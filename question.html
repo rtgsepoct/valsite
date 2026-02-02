@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Valentine?</title>
+  <style>
+    :root { --bg1:#ffdde1; --bg2:#ee9ca7; }
+    body{
+      margin:0;
+      min-height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-family: system-ui, Arial;
+      background: radial-gradient(circle at top, var(--bg1), var(--bg2));
+    }
+    .card{
+      width:min(720px, 92vw);
+      background: rgba(255,255,255,0.75);
+      backdrop-filter: blur(8px);
+      border-radius: 20px;
+      padding: 40px 28px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+      position: relative;
+      overflow: hidden;
+    }
+    h1{
+      margin: 0 0 10px;
+      font-size: clamp(28px, 4vw, 44px);
+      text-align:center;
+    }
+    p{
+      margin: 0 0 26px;
+      text-align:center;
+      opacity: 0.8;
+    }
+    .playground{
+      position: relative;
+      height: 260px;
+      border-radius: 18px;
+      background: rgba(255,255,255,0.55);
+      border: 1px solid rgba(0,0,0,0.06);
+      overflow: hidden;
+    }
+    .btn{
+      border: 0;
+      padding: 14px 22px;
+      border-radius: 999px;
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 16px;
+      box-shadow: 0 12px 30px rgba(0,0,0,0.12);
+      transition: transform 120ms ease, filter 120ms ease;
+      user-select: none;
+    }
+    .btn:active{ transform: scale(0.98); }
+    .yes{
+      background: #22c55e;
+      color: #fff;
+      position: absolute;
+      left: 50%;
+      top: 55%;
+      transform: translate(-120%, -50%);
+    }
+    .no{
+      background: #ef4444;
+      color: #fff;
+      position: absolute;
+      left: 50%;
+      top: 55%;
+      transform: translate(20%, -50%);
+      touch-action: none;
+    }
+    .hint{
+      margin-top: 18px;
+      text-align:center;
+      font-size: 14px;
+      opacity: 0.75;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Will you be my Valentine? 💘</h1>
+    <p>Choose wisely 😄</p>
+
+    <div class="playground" id="playground">
+      <button class="btn yes" id="yesBtn">Yes</button>
+      <button class="btn no" id="noBtn" aria-label="No">No</button>
+    </div>
+
+    <div class="hint">Tip: try to click “No” 😈</div>
+  </div>
+
+  <script>
+    const playground = document.getElementById("playground");
+    const noBtn = document.getElementById("noBtn");
+    const yesBtn = document.getElementById("yesBtn");
+
+    // Navigate on YES
+    yesBtn.addEventListener("click", () => {
+      window.location.href = "./yes.html";
+    });
+
+    // Prevent NO from doing anything (no navigation)
+    noBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+    });
+
+    // Place NO button randomly within bounds
+    function moveNoButton() {
+      const pad = 12;
+
+      const box = playground.getBoundingClientRect();
+      const btn = noBtn.getBoundingClientRect();
+
+      const maxX = box.width - btn.width - pad;
+      const maxY = box.height - btn.height - pad;
+
+      // Random position
+      const x = Math.max(pad, Math.floor(Math.random() * maxX));
+      const y = Math.max(pad, Math.floor(Math.random() * maxY));
+
+      noBtn.style.left = x + "px";
+      noBtn.style.top = y + "px";
+      noBtn.style.transform = "translate(0,0)";
+    }
+
+    // Detect "near" cursor
+    function handleMouseMove(e) {
+      const box = playground.getBoundingClientRect();
+      const btn = noBtn.getBoundingClientRect();
+
+      const mouseX = e.clientX - box.left;
+      const mouseY = e.clientY - box.top;
+
+      const btnX = (btn.left - box.left) + btn.width / 2;
+      const btnY = (btn.top - box.top) + btn.height / 2;
+
+      const dx = mouseX - btnX;
+      const dy = mouseY - btnY;
+      const dist = Math.sqrt(dx*dx + dy*dy);
+
+      // Move when cursor gets within this radius (px)
+      const dangerRadius = 110;
+
+      if (dist < dangerRadius) moveNoButton();
+    }
+
+    // Also move on hover / focus / touch attempt
+    noBtn.addEventListener("mouseenter", moveNoButton);
+    noBtn.addEventListener("focus", moveNoButton);
+    noBtn.addEventListener("touchstart", (e) => {
+      e.preventDefault();
+      moveNoButton();
+    }, { passive: false });
+
+    playground.addEventListener("mousemove", handleMouseMove);
+
+    // Initial random placement (so it doesn't always start centered)
+    // Wait a tick so layout is settled.
+    setTimeout(moveNoButton, 50);
+  </script>
+</body>
+</html>

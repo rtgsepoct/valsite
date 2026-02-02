@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Yay! 💖</title>
+  <style>
+    body{
+      margin:0;
+      min-height:100vh;
+      font-family: system-ui, Arial;
+      color:#fff;
+      overflow:hidden;
+      background:#000;
+    }
+    .bg-video{
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      filter: brightness(0.55);
+      z-index: -2;
+    }
+    .overlay{
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(circle at top, rgba(255,105,180,0.25), rgba(0,0,0,0.55));
+      z-index: -1;
+    }
+    .wrap{
+      min-height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding: 22px;
+    }
+    .card{
+      width:min(900px, 92vw);
+      border-radius: 22px;
+      background: rgba(255,255,255,0.12);
+      backdrop-filter: blur(8px);
+      box-shadow: 0 20px 70px rgba(0,0,0,0.45);
+      padding: 28px;
+      display:grid;
+      grid-template-columns: 1fr;
+      gap: 18px;
+    }
+    .content{
+      text-align:center;
+      padding: 28px 18px;
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,0.18);
+      background: rgba(0,0,0,0.18);
+    }
+    h1{
+      margin:0 0 10px;
+      font-size: clamp(30px, 4vw, 54px);
+      letter-spacing: 0.2px;
+    }
+    p{
+      margin:0;
+      font-size: clamp(16px, 2vw, 20px);
+      line-height:1.5;
+      opacity: 0.95;
+    }
+    .small{
+      margin-top: 14px;
+      font-size: 14px;
+      opacity: 0.8;
+    }
+    .controls{
+      display:flex;
+      justify-content:center;
+      gap:10px;
+      flex-wrap: wrap;
+      margin-top: 16px;
+    }
+    button{
+      border:0;
+      border-radius: 999px;
+      padding: 10px 14px;
+      font-weight: 700;
+      cursor:pointer;
+    }
+  </style>
+</head>
+<body>
+  <!-- Background Video -->
+  <video class="bg-video" src="./bg.mp4" autoplay muted loop playsinline></video>
+  <div class="overlay"></div>
+
+  <!-- Music (note: many browsers require user interaction before audio plays) -->
+  <audio id="music" src="./song.mp3" loop></audio>
+
+  <div class="wrap">
+    <div class="card">
+      <div class="content">
+        <h1>Happy Valentine’s Day! 💘</h1>
+        <p>
+          I’m so lucky to have you. <br />
+          Here’s to more laughs, more memories, and more love—together.
+        </p>
+
+        <div class="controls">
+          <button id="playBtn">Play Music ▶</button>
+          <button id="pauseBtn">Pause ⏸</button>
+        </div>
+
+        <div class="small">If music doesn’t auto-play, tap “Play Music”.</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const music = document.getElementById("music");
+    const playBtn = document.getElementById("playBtn");
+    const pauseBtn = document.getElementById("pauseBtn");
+
+    // Try autoplay (may be blocked until user interaction)
+    window.addEventListener("load", async () => {
+      try { await music.play(); } catch (_) {}
+    });
+
+    playBtn.addEventListener("click", async () => {
+      try { await music.play(); } catch (_) {}
+    });
+
+    pauseBtn.addEventListener("click", () => {
+      music.pause();
+    });
+  </script>
+</body>
+</html>
