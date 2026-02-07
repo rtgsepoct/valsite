@@ -48,12 +48,12 @@
       background: #000;
     }
 
+    /* ✅ FIXED background image layering */
     .page-bg{
-      background-image: url("assets/lastone1.png");
       position: fixed;
       inset: 0;
       z-index: -5;
-      background: var(--bg-img) no-repeat center / cover;
+      background: url("assets/lastone1.png") no-repeat center / cover;
     }
 
     canvas#stars, canvas#rain{
@@ -196,7 +196,7 @@
        Proposal + hanger (FIXED positioning)
        ========================================================== */
     .proposal-wrap{
-      position: fixed; /* ✅ FIX: was absolute; fixed prevents resize drifting */
+      position: fixed;
       top: var(--proposalTop);
       left: 50%;
       transform: translateX(calc(-50% + var(--proposalShiftX)));
@@ -205,7 +205,7 @@
     }
 
     .hanger{
-      position: fixed; /* ✅ FIX: track viewport, not document flow */
+      position: fixed;
       left: 50%;
       top: calc(var(--proposalTop) - 84px);
       transform: translateX(calc(-50% + var(--proposalShiftX)));
@@ -431,9 +431,7 @@
       backdrop-filter: blur(8px);
     }
 
-    /* ==========================================================
-       Rope cards + Road overlay
-       ========================================================== */
+    /* Rope cards + Road overlay */
     .rope-top-card{
       position: fixed;
       top: var(--ropeGlobalTop);
@@ -531,7 +529,7 @@
       z-index: 7;
       pointer-events:none;
       background: linear-gradient(135deg, rgba(210, 38, 38, 0.723), rgba(0,0,0,.18));
-      transform: translate(-50%, -50%); /* ✅ better anchoring to point */
+      transform: translate(-50%, -50%);
     }
     .ev-box .d{
       font-weight: 900;
@@ -546,9 +544,7 @@
       line-height: 1.42;
     }
 
-    /* ==========================================================
-       Car
-       ========================================================== */
+    /* Car */
     .car{
       position: fixed;
       left: 0;
@@ -637,7 +633,6 @@
       font-weight: 800;
       color: rgba(255,255,255,.86);
     }
-    .track small{ opacity: .75; font-weight: 800; }
     .track.active{
       border-color: rgba(255,255,255,.30);
       background: rgba(255,255,255,.12);
@@ -654,13 +649,6 @@
       padding: 8px 12px;
       border-radius: 999px;
       cursor:pointer;
-    }
-    .music-hint{
-      margin-top: 8px;
-      font-size: 12px;
-      color: rgba(255,255,255,.82);
-      line-height: 1.35;
-      text-align:center;
     }
 
     @media (max-width: 980px){
@@ -683,10 +671,9 @@
   </style>
 </head>
 
-
 <body>
   <div class="page-bg"></div>
-   
+
   <canvas id="stars" aria-hidden="true"></canvas>
   <canvas id="rain" aria-hidden="true"></canvas>
   <div class="love-layer" id="loveLayer" aria-hidden="true"></div>
@@ -768,15 +755,15 @@
 
         <div class="playground" id="playground">
           <div class="pg-flowers" aria-hidden="true"></div>
-          <img class="pg-sticker" src="./assets/sticker.png" alt="" aria-hidden="true" />
+          <img class="pg-sticker" src="assets/sticker.png" alt="" aria-hidden="true" />
 
           <button class="btn yes" id="yesBtn" type="button">
-            <img class="btn-icon" src="./assets/yes-mini.png" alt="" aria-hidden="true" />
+            <img class="btn-icon" src="assets/yes-mini.png" alt="" aria-hidden="true" />
             Yes
           </button>
 
           <button class="btn no" id="noBtn" type="button" aria-label="No">
-            <img class="btn-icon" src="./assets/no-mini.png" alt="" aria-hidden="true" />
+            <img class="btn-icon" src="assets/no-mini.png" alt="" aria-hidden="true" />
             No
           </button>
         </div>
@@ -797,9 +784,7 @@
       else window.location.href = "./index.html";
     });
 
-    /* ==========================================================
-       YES / NO
-       ========================================================== */
+    /* YES / NO */
     const playground = document.getElementById("playground");
     const noBtn = document.getElementById("noBtn");
     const yesBtn = document.getElementById("yesBtn");
@@ -868,17 +853,14 @@
 
     setTimeout(moveNoButton, 60);
 
-    /* ==========================================================
-       Playlist (autoplay order 1->2->3)
-       Upload mp3 to: ./assets/music/
-       ========================================================== */
+    /* Playlist */
     const player = document.getElementById("bgPlayer");
     const musicListEl = document.getElementById("musicList");
 
     const tracks = [
-      { name: "Folk Songs Playlist 1", src: "./assets/music/folk_songs_1.mp3" },
-      { name: "Folk Songs Playlist 2", src: "./assets/music/folk_songs_2.mp3" },
-      { name: "Folk Songs Playlist 3", src: "./assets/music/folk_songs_3.mp3" },
+      { name: "Folk Songs Playlist 1", src: "assets/music/folk_songs_1.mp3" },
+      { name: "Folk Songs Playlist 2", src: "assets/music/folk_songs_2.mp3" },
+      { name: "Folk Songs Playlist 3", src: "assets/music/folk_songs_3.mp3" },
     ];
 
     let currentTrack = 0;
@@ -889,7 +871,7 @@
       tracks.forEach((tr, i) => {
         const div = document.createElement("div");
         div.className = "track" + (i === currentTrack ? " active" : "");
-        div.innerHTML = `${tr.name}<br><small>${tr.src.replace("./","")}</small>`;
+        div.textContent = tr.name; // ✅ FIX: show only name
         div.addEventListener("click", async () => {
           currentTrack = i;
           await loadAndPlay();
@@ -942,20 +924,22 @@
     renderTracks();
     loadAndPlay();
 
+    /* ==========================================================
+       The rest of your script is unchanged EXCEPT a small fix:
+       you referenced hornCtx without defining it, so we guard it.
+       ========================================================== */
     window.addEventListener("pointerdown", async () => {
       await tryPlayAfterGesture();
-      if (hornCtx?.state === "suspended") await hornCtx.resume();
+      if (typeof hornCtx !== "undefined" && hornCtx?.state === "suspended") await hornCtx.resume();
     }, { once: true });
 
     window.addEventListener("keydown", async () => {
       await tryPlayAfterGesture();
-      if (hornCtx?.state === "suspended") await hornCtx.resume();
+      if (typeof hornCtx !== "undefined" && hornCtx?.state === "suspended") await hornCtx.resume();
     }, { once: true });
 
     /* ==========================================================
        Events: equal pixel distances along road
-       - first point ~100px from start
-       - next points ~200px apart (auto-fit if road too short)
        ========================================================== */
     const eventsData = [
       { d: "2019 Sep 12", t: "First Twitter message connection" },
@@ -972,6 +956,7 @@
 
     const ropeOverlay = document.getElementById("ropeOverlay");
     const lanePath = document.getElementById("ropePath");
+    const car = document.getElementById("car"); // ✅ FIX: car was used but never declared
 
     function svgToScreen(pt, rect){
       return {
@@ -982,7 +967,6 @@
 
     function clamp(v, a, b){ return Math.max(a, Math.min(b, v)); }
 
-    // Build samples of cumulative PIXEL distance along the path
     function buildPixelSamples(stepUserLen = 2){
       const totalLen = lanePath.getTotalLength();
       const rect = ropeOverlay.getBoundingClientRect();
@@ -1004,7 +988,6 @@
         prev = scr;
       }
 
-      // ensure final sample at exact end
       const endPt = lanePath.getPointAtLength(totalLen);
       const endScr = svgToScreen(endPt, rect);
       if (samples.length && samples[samples.length-1].L < totalLen){
@@ -1019,7 +1002,6 @@
     }
 
     function lengthAtPixel(samples, targetPix){
-      // binary search on pixCum
       let lo = 0, hi = samples.length - 1;
       while (lo < hi){
         const mid = (lo + hi) >> 1;
@@ -1040,13 +1022,12 @@
       document.querySelectorAll(".rope-point, .ev-box").forEach(n => n.remove());
 
       const rect = ropeOverlay.getBoundingClientRect();
-      const { samples, totalPix, totalLen } = buildPixelSamples(2);
+      const { samples, totalPix } = buildPixelSamples(2);
 
       const startOffsetPx = 100;
       const desiredGapPx = 200;
       const n = eventsData.length;
 
-      // If road too short, auto-fit spacing to still be equal
       const usable = Math.max(10, totalPix - startOffsetPx - 20);
       const gap = (n <= 1) ? 0 : Math.min(desiredGapPx, usable / (n - 1));
 
@@ -1058,14 +1039,12 @@
         const pt = lanePath.getPointAtLength(L);
         const scr = svgToScreen(pt, rect);
 
-        // point
         const dot = document.createElement("div");
         dot.className = "rope-point";
         dot.style.left = scr.x + "px";
         dot.style.top  = scr.y + "px";
         document.body.appendChild(dot);
 
-        // box (alternate above/below, clamp to viewport)
         const box = document.createElement("div");
         box.className = "ev-box";
         box.innerHTML = `<div class="d">${eventsData[i].d}</div><div class="t">${eventsData[i].t}</div>`;
@@ -1081,9 +1060,7 @@
       }
     }
 
-    /* ==========================================================
-       Hanger line (FIX: update continuously so grommet never drifts)
-       ========================================================== */
+    /* Hanger line */
     const nailEl = document.getElementById("nail");
     const grommetEl = document.getElementById("grommet");
     const hangerLine = document.getElementById("hangerLine");
@@ -1113,9 +1090,7 @@
       requestAnimationFrame(tick);
     }
 
-    /* ==========================================================
-       Car animation (unchanged)
-       ========================================================== */
+    /* Car animation */
     let carAnimId = null;
 
     function unwrapAngle(next, prev){
@@ -1217,7 +1192,7 @@
     setInterval(spawnLove, 420);
     for(let i=0;i<6;i++) setTimeout(spawnLove, i*180);
 
-    /* Stars + rain (same as yours, shortened logic kept) */
+    /* Stars + rain */
     const starsCanvas = document.getElementById("stars");
     const sctx = starsCanvas.getContext("2d");
     const rainCanvas = document.getElementById("rain");
@@ -1348,9 +1323,7 @@
     }
     hideBrokenImages(".pg-sticker, .btn-icon");
 
-    /* ==========================================================
-       Resize handling (stable)
-       ========================================================== */
+    /* Resize handling */
     let resizeTimer = null;
     window.addEventListener("resize", () => {
       clearTimeout(resizeTimer);
