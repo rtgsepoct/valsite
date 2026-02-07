@@ -4,131 +4,478 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Yay! 💖</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@600;700;800&display=swap" rel="stylesheet">
+
   <style>
+    :root{
+      --bg1:#2a0b1f;
+      --bg2:#140610;
+      --glass: rgba(255,255,255,0.12);
+      --stroke: rgba(255,255,255,0.18);
+      --text: #ffffff;
+
+      /* slider tuning */
+      --lane-gap: 10px;
+      --tile-radius: 12px;
+      --tile-h: 130px;
+      --scroll-seconds: 14s; /* overall speed */
+    }
+
+    *{ box-sizing:border-box; }
+
     body{
       margin:0;
       min-height:100vh;
-      font-family: system-ui, Arial;
-      color:#fff;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      color:var(--text);
       overflow:hidden;
-      background:#000;
+      background:
+        radial-gradient(1200px 700px at 50% 55%, rgba(105,105,189,0.18), transparent 55%),
+        radial-gradient(900px 500px at 50% 35%, rgba(255,255,255,0.06), transparent 60%),
+        linear-gradient(135deg, var(--bg1), var(--bg2));
     }
-    .bg-video{
-      position: fixed;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      filter: brightness(0.55);
-      z-index: -2;
-    }
+
     .overlay{
       position: fixed;
       inset: 0;
-      background: radial-gradient(circle at top, rgba(255,105,180,0.25), rgba(0,0,0,0.55));
-      z-index: -1;
+      background: radial-gradient(circle at top, rgba(255,105,180,0.18), rgba(0,0,0,0.58));
+      z-index: 0;
+      pointer-events:none;
     }
+
+    .celebration{
+      position: fixed;
+      inset: 0;
+      z-index: 55;
+      pointer-events:none;
+      overflow:hidden;
+    }
+
     .wrap{
-      min-height:100vh;
+      position: relative;
+      z-index: 2;
+      min-height: 200vh;
       display:flex;
-      align-items:center;
       justify-content:center;
-      padding: 22px;
+      align-items:flex-start;
+      padding: 24px 16px 50px;
+      overflow:auto;
     }
-    .card{
-      width:min(900px, 92vw);
-      border-radius: 22px;
-      background: rgba(255,255,255,0.12);
-      backdrop-filter: blur(8px);
-      box-shadow: 0 20px 70px rgba(0,0,0,0.45);
-      padding: 28px;
-      display:grid;
-      grid-template-columns: 1fr;
-      gap: 18px;
+
+    .column{
+      width: min(1500px, 100%);
+      display:flex;
+      flex-direction:column;
+      gap: 1px;
     }
+
     .content{
       text-align:center;
-      padding: 28px 18px;
-      border-radius: 18px;
-      border: 1px solid rgba(255,255,255,0.18);
-      background: rgba(0,0,0,0.18);
+      padding: 1px 5px;
+      border-radius: 18px 18px 0 0;
+      border: 1px solid var(--stroke);
+      background: var(--glass);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.45);
     }
+
     h1{
-      margin:0 0 10px;
-      font-size: clamp(30px, 4vw, 54px);
+      margin:0 0 6px;
+      font-size: clamp(18px, 3vw, 28px);
       letter-spacing: 0.2px;
     }
-    p{
-      margin:0;
-      font-size: clamp(16px, 2vw, 20px);
-      line-height:1.5;
-      opacity: 0.95;
-    }
-    .small{
-      margin-top: 14px;
-      font-size: 14px;
-      opacity: 0.8;
-    }
+
     .controls{
       display:flex;
       justify-content:center;
       gap:10px;
       flex-wrap: wrap;
-      margin-top: 16px;
+      margin-top: 5px;
     }
+
     button{
       border:0;
       border-radius: 999px;
       padding: 10px 14px;
-      font-weight: 700;
+      font-weight: 800;
       cursor:pointer;
+      background: rgba(30, 96, 218, 0.92);
+      color: #fff;
+    }
+    button:active{ transform: translateY(1px); }
+
+    .back-btn{
+      width: 90px;
+      height:38px;
+      padding: 10px 14px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.18);
+      background:  rgba(30, 96, 218, 0.92);
+      color: white;
+      font-weight: 800;
+      cursor: pointer;
+    }
+    .back-btn:hover{ background: rgba(0,0,0,0.85); }
+
+    /* FRAME OUTER CARD */
+    .frame{
+      width: 100%;
+      padding: 16px;
+      border-radius: 0 0 18px 18px;
+      border: 1px solid var(--stroke);
+      background: var(--glass);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 20px 70px rgba(0,0,0,0.45);
+    }
+
+    .frame-inner{
+      position: relative;
+      width: 100%;
+      margin: 0 auto;
+      max-width: 1200px;
+    }
+
+    .frame-inner > img.frame-bg{
+      width: 100%;
+      height: auto;
+      max-height: 85vh;
+      display:block;
+      object-fit: contain;
+      border-radius: 14px;
+      background: rgba(0,0,0,0.12);
+    }
+
+    /* ========= LEFT & RIGHT AUTO SLIDERS (INSIDE FRAME) ========= */
+    .lanes{
+      position:absolute;
+      inset: 0;
+      pointer-events:none; /* important: doesn’t block clicks */
+    }
+
+    .lane{
+      position:absolute;
+      top: 18%;
+      bottom: 14%;
+      width: clamp(120px, 16vw, 210px);
+      overflow:hidden;
+      border-radius: 14px;
+      background: rgba(0,0,0,0.10);
+      border: 1px solid rgba(255,255,255,0.10);
+      backdrop-filter: blur(2px);
+    }
+
+    .lane.left{ left: clamp(6%, 6vw, 10%); }
+    .lane.right{ right: clamp(6%, 6vw, 10%); }
+
+    .lane-track{
+      display:flex;
+      flex-direction:column;
+      gap: var(--lane-gap);
+      padding: 10px;
+      will-change: transform;
+      animation: laneScroll var(--scroll-seconds) linear infinite;
+    }
+
+    /* Right side scrolls opposite direction for nicer effect */
+    .lane.right .lane-track{
+      animation-direction: reverse;
+    }
+
+    .tile{
+      width: 100%;
+      height: var(--tile-h);
+      border-radius: var(--tile-radius);
+      overflow:hidden;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.14);
+      box-shadow: 0 10px 24px rgba(0,0,0,0.35);
+    }
+
+    .tile img{
+      width:100%;
+      height:100%;
+      object-fit: cover;
+      display:block;
+    }
+
+    /* The trick: we duplicate the list, then translate half the height */
+    @keyframes laneScroll{
+      from { transform: translateY(0); }
+      to   { transform: translateY(-50%); }
+    }
+
+    /* ========= Celebration animations ========= */
+    .balloon{
+      position:absolute;
+      bottom:-120px;
+      width: 42px;
+      height: 54px;
+      border-radius: 50% 50% 48% 48%;
+      filter: drop-shadow(0 10px 12px rgba(0,0,0,0.35));
+      animation: floatUp linear forwards;
+      opacity: 0.95;
+    }
+    .balloon:after{
+      content:"";
+      position:absolute;
+      left:50%;
+      top: 52px;
+      width: 2px;
+      height: 48px;
+      background: rgba(255,255,255,0.55);
+      transform: translateX(-50%);
+      opacity: 0.55;
+    }
+    @keyframes floatUp{
+      from { transform: translateY(0) translateX(0) rotate(0deg); }
+      to   { transform: translateY(-120vh) translateX(var(--drift)) rotate(var(--rot)); }
+    }
+
+    .spark{
+      position:absolute;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      opacity: 0;
+      transform: translate(-50%,-50%);
+      animation: sparkPop 900ms ease-out forwards;
+      filter: drop-shadow(0 0 10px rgba(255,255,255,0.25));
+    }
+    @keyframes sparkPop{
+      0%   { opacity:0; transform: translate(-50%,-50%) scale(0.2); }
+      20%  { opacity:1; }
+      100% { opacity:0; transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(1); }
+    }
+
+    .fade-out{ animation: fadeOut 900ms ease forwards; }
+    @keyframes fadeOut{ to { opacity:0; } }
+
+    /* Responsive: show 2 tiles at a time, slower scroll */
+    @media (max-width: 768px){
+      :root{
+        --tile-h: 110px;
+        --scroll-seconds: 18s;
+      }
+      .frame-inner > img.frame-bg{ max-height: 88vh; }
+      .lane{
+        width: clamp(105px, 20vw, 160px);
+        top: 20%;
+        bottom: 12%;
+      }
+    }
+
+    @font-face{
+      font-family: "NotoSansDevanagariLocal";
+      src: url("./assets/fonts/NotoSansDevanagari-Regular.ttf") format("truetype");
+      font-weight: 400;
+      font-style: normal;
+    }
+    @font-face{
+      font-family: "NotoSansDevanagariLocal";
+      src: url("./assets/fonts/NotoSansDevanagari-Bold.ttf") format("truetype");
+      font-weight: 700;
+      font-style: normal;
     }
   </style>
 </head>
-<body>
-  <!-- Background Video -->
-  <video class="bg-video" src="./bg.mp4" autoplay muted loop playsinline></video>
-  <div class="overlay"></div>
 
-  <!-- Music (note: many browsers require user interaction before audio plays) -->
-  <audio id="music" src="./song.mp3" loop></audio>
+<body>
+  <div class="overlay"></div>
+  <div id="celebration" class="celebration"></div>
+
+  <audio id="music" src="./assets/music/folk_songs_1.mp3" loop></audio>
 
   <div class="wrap">
-    <div class="card">
+    <div class="column">
       <div class="content">
         <h1>Happy Valentine’s Day! 💘</h1>
-        <p>
-          I’m so lucky to have you. <br />
-          Here’s to more laughs, more memories, and more love—together.
-        </p>
-
         <div class="controls">
+          <button onclick="history.back()" class="back-btn">← Back</button>
           <button id="playBtn">Play Music ▶</button>
           <button id="pauseBtn">Pause ⏸</button>
-        </div>
 
-        <div class="small">If music doesn’t auto-play, tap “Play Music”.</div>
+          <!-- ✅ FIXED NEXT BUTTON -->
+          <button type="button" id="nextBtn" class="next-btn">Next</button>
+        </div>
       </div>
+
+      <div class="frame">
+        <div class="frame-inner">
+          <img class="frame-bg" src="./assets/Valentine's Day Frame.png" alt="Valentine frame">
+
+          <!-- ✅ sliders -->
+          <div class="lanes" aria-hidden="true">
+            <div class="lane left">
+              <div class="lane-track" id="leftTrack"></div>
+            </div>
+
+            <div class="lane right">
+              <div class="lane-track" id="rightTrack"></div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
     </div>
   </div>
 
   <script>
+    /* ========= NAVIGATION FIX ========= */
+    document.getElementById("nextBtn").addEventListener("click", () => {
+      // Use relative path if timi.html is in same folder
+      window.location.href = "./timi.html";
+    });
+
+    /* ========= MUSIC ========= */
     const music = document.getElementById("music");
     const playBtn = document.getElementById("playBtn");
     const pauseBtn = document.getElementById("pauseBtn");
 
-    // Try autoplay (may be blocked until user interaction)
     window.addEventListener("load", async () => {
       try { await music.play(); } catch (_) {}
+      startCelebration(80000);
+      initLanes();
     });
 
     playBtn.addEventListener("click", async () => {
       try { await music.play(); } catch (_) {}
     });
+    pauseBtn.addEventListener("click", () => music.pause());
 
-    pauseBtn.addEventListener("click", () => {
-      music.pause();
-    });
+    /* ========= AUTO-SLIDING LANES =========
+       Put your photo paths here.
+       Rule: use 6–10+ images for smoothness.
+    */
+    const leftPhotos = [
+      "./assets/photos/left1.jpg",
+      "./assets/photos/left2.jpg",
+      "./assets/photos/left3.jpg",
+      "./assets/photos/left4.jpg",
+      "./assets/photos/left5.jpg",
+      "./assets/photos/left6.jpg",
+    ];
+
+    const rightPhotos = [
+      "./assets/photos/right1.jpg",
+      "./assets/photos/right2.jpg",
+      "./assets/photos/right3.jpg",
+      "./assets/photos/right4.jpg",
+      "./assets/photos/right5.jpg",
+      "./assets/photos/right6.jpg",
+    ];
+
+    function buildTrack(trackEl, photos){
+      // Duplicate list to make seamless loop
+      const doubled = photos.concat(photos);
+
+      trackEl.innerHTML = "";
+      for(const src of doubled){
+        const tile = document.createElement("div");
+        tile.className = "tile";
+        const img = document.createElement("img");
+        img.src = src;
+        img.alt = "photo";
+        img.loading = "lazy";
+        tile.appendChild(img);
+        trackEl.appendChild(tile);
+      }
+
+      // Ensure animation distance is correct (-50%).
+      // This works because we doubled the list and the keyframes go to -50%.
+    }
+
+    function initLanes(){
+      buildTrack(document.getElementById("leftTrack"), leftPhotos);
+      buildTrack(document.getElementById("rightTrack"), rightPhotos);
+    }
+
+    /* ========= Celebration ========= */
+    const layer = document.getElementById("celebration");
+    function rand(min, max){ return Math.random() * (max - min) + min; }
+    function pick(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+
+    const balloonColors = [
+      "linear-gradient(180deg, rgba(255,82,130,1), rgba(180,35,90,1))",
+      "linear-gradient(180deg, rgba(255,215,90,1), rgba(190,120,10,1))",
+      "linear-gradient(180deg, rgba(120,220,255,1), rgba(20,120,190,1))",
+      "linear-gradient(180deg, rgba(170,255,160,1), rgba(40,160,90,1))",
+      "linear-gradient(180deg, rgba(255,255,255,0.95), rgba(210,210,210,0.95))"
+    ];
+    const sparkColors = [
+      "rgba(255,105,180,1)",
+      "rgba(255,230,120,1)",
+      "rgba(140,235,255,1)",
+      "rgba(180,255,170,1)",
+      "rgba(255,255,255,1)"
+    ];
+
+    function spawnBalloon(){
+      const b = document.createElement("div");
+      b.className = "balloon";
+      b.style.left = rand(2, 98) + "vw";
+      b.style.background = pick(balloonColors);
+
+      const dur = rand(7.5, 12.5);
+      b.style.animationDuration = dur + "s";
+      b.style.setProperty("--drift", rand(-120, 120) + "px");
+      b.style.setProperty("--rot", rand(-18, 18) + "deg");
+
+      layer.appendChild(b);
+      setTimeout(() => b.remove(), (dur + 0.2) * 1000);
+    }
+
+    function spawnFireworkBurst(){
+      const x = rand(12, 88);
+      const y = rand(10, 50);
+      const particles = Math.floor(rand(16, 26));
+
+      for(let i=0;i<particles;i++){
+        const p = document.createElement("div");
+        p.className = "spark";
+        p.style.left = x + "vw";
+        p.style.top  = y + "vh";
+        p.style.background = pick(sparkColors);
+
+        const angle = rand(0, Math.PI * 2);
+        const dist  = rand(40, 170);
+        p.style.setProperty("--dx", (Math.cos(angle) * dist) + "px");
+        p.style.setProperty("--dy", (Math.sin(angle) * dist) + "px");
+
+        const size = rand(5, 10);
+        p.style.width = size + "px";
+        p.style.height = size + "px";
+
+        layer.appendChild(p);
+        setTimeout(() => p.remove(), 950);
+      }
+    }
+
+    function startCelebration(ms){
+      const balloonTimer = setInterval(() => {
+        const count = Math.floor(rand(1, 4));
+        for(let i=0;i<count;i++) spawnBalloon();
+      }, 450);
+
+      const fireworkTimer = setInterval(() => {
+        spawnFireworkBurst();
+        if(Math.random() < 0.45) setTimeout(spawnFireworkBurst, rand(140, 260));
+      }, 650);
+
+      setTimeout(() => {
+        clearInterval(balloonTimer);
+        clearInterval(fireworkTimer);
+
+        layer.classList.add("fade-out");
+        setTimeout(() => {
+          layer.innerHTML = "";
+          layer.style.display = "none";
+        }, 950);
+      }, ms);
+    }
   </script>
 </body>
 </html>

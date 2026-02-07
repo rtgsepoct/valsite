@@ -1,0 +1,376 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>💙 Timi</title>
+
+<style>
+:root{
+  --glass: rgba(255,255,255,0.14);
+  --stroke: rgba(255,255,255,0.24);
+  --text: #ffffff;
+
+  --card-max: 1320px;     /* bigger middle division */
+  --card-pad: 22px;
+
+  --tile-radius: 16px;
+  --tile-border: rgba(255,255,255,0.18);
+}
+
+*{ box-sizing:border-box; }
+
+body{
+  margin:0;
+  min-height:100vh;
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial;
+  color:var(--text);
+  overflow:hidden;
+}
+
+/* ===== BACKGROUND IMAGE CYCLE ===== */
+.bg{
+  position:fixed;
+  inset:0;
+  z-index:-5;
+  animation: zoomSlow 40s linear infinite;
+}
+.bg img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  position:absolute;
+  inset:0;
+  opacity:0;
+  animation: bgFade 40s infinite;
+}
+.bg img:nth-child(1){ animation-delay:0s; }
+.bg img:nth-child(2){ animation-delay:10s; }
+.bg img:nth-child(3){ animation-delay:20s; }
+.bg img:nth-child(4){ animation-delay:30s; }
+
+@keyframes bgFade{
+  0%{opacity:0}
+  5%{opacity:1}
+  25%{opacity:1}
+  30%{opacity:0}
+  100%{opacity:0}
+}
+@keyframes zoomSlow{
+  from{ transform:scale(1); }
+  to{ transform:scale(1.08); }
+}
+
+/* Stars overlay */
+.stars{
+  position:fixed;
+  inset:0;
+  background: url("./assets/backgrounds/stars.png") repeat;
+  opacity:0.20;
+  animation: drift 120s linear infinite;
+  z-index:-4;
+  pointer-events:none;
+}
+@keyframes drift{
+  from{ background-position:0 0; }
+  to{ background-position:2000px 1000px; }
+}
+
+/* ===== WATER RIPPLE OVERLAY (CSS) =====
+   Two animated radial gradients drifting = ripple feeling.
+*/
+.ripples{
+  position:fixed;
+  inset:-20%;
+  z-index:-3;
+  pointer-events:none;
+  opacity:0.55;
+  filter: blur(0.2px);
+  background:
+    radial-gradient(circle at 20% 30%, rgba(255,255,255,0.18) 0 2px, transparent 3px 38px),
+    radial-gradient(circle at 70% 60%, rgba(255,255,255,0.14) 0 2px, transparent 3px 46px),
+    radial-gradient(circle at 40% 80%, rgba(255,255,255,0.12) 0 2px, transparent 3px 52px);
+  animation: rippleMove 8s linear infinite;
+  mix-blend-mode: overlay;
+}
+@keyframes rippleMove{
+  0%   { transform: translate3d(0,0,0) scale(1); }
+  50%  { transform: translate3d(-2.5%,1.5%,0) scale(1.02); }
+  100% { transform: translate3d(0,0,0) scale(1); }
+}
+
+/* Soft dark vignette for readability */
+.vignette{
+  position:fixed;
+  inset:0;
+  z-index:-2;
+  pointer-events:none;
+  background: radial-gradient(circle at 50% 40%, rgba(0,0,0,0.12), rgba(0,0,0,0.55));
+}
+
+/* ===== LEAVES CANVAS ===== */
+#leaves{
+  position:fixed;
+  inset:0;
+  z-index:-1;
+  pointer-events:none;
+}
+
+/* ===== CONTENT ===== */
+.wrap{
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding: 22px;
+}
+
+.card{
+  width: min(var(--card-max), 100%);
+  background: var(--glass);
+  border: 1px solid var(--stroke);
+  border-radius: 22px;
+  backdrop-filter: blur(16px);
+  box-shadow: 0 30px 90px rgba(0,0,0,0.60);
+  padding: var(--card-pad);
+}
+
+.header{
+  display:flex;
+  flex-wrap:wrap;
+  gap:12px;
+  align-items:center;
+  justify-content:space-between;
+  margin-bottom: 14px;
+}
+
+h1{
+  margin:0;
+  font-size: clamp(22px, 2.8vw, 40px);
+  letter-spacing: 0.2px;
+}
+
+.sub{
+  margin:0;
+  opacity:0.9;
+  font-size: clamp(13px, 1.2vw, 16px);
+}
+
+.controls{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+}
+
+button{
+  border:0;
+  border-radius:999px;
+  padding:10px 16px;
+  font-weight:800;
+  cursor:pointer;
+  background: rgba(30,96,218,0.95);
+  color:white;
+}
+button:hover{ filter:brightness(1.1); }
+button:active{ transform: translateY(1px); }
+
+/* ===== 4-COLUMN PHOTO STRIP ===== */
+.grid{
+  display:grid;
+  grid-template-columns: repeat(4, 1fr); /* 4 photos in one row */
+  gap: 14px;
+}
+
+.tile{
+  border-radius: var(--tile-radius);
+  overflow:hidden;
+  background: rgba(0,0,0,0.22);
+  border: 1px solid var(--tile-border);
+  box-shadow: 0 14px 34px rgba(0,0,0,0.45);
+  position:relative;
+  aspect-ratio: 4 / 3; /* consistent tiles */
+}
+
+.tile img{
+  width:100%;
+  height:100%;
+  object-fit: cover;
+  display:block;
+  transform: scale(1.02);
+  transition: transform 500ms ease, filter 500ms ease;
+}
+
+.tile:hover img{
+  transform: scale(1.08);
+  filter: saturate(1.08) contrast(1.04);
+}
+
+.caption{
+  position:absolute;
+  left:10px;
+  bottom:10px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-weight:800;
+  font-size: 12px;
+  background: rgba(0,0,0,0.35);
+  border: 1px solid rgba(255,255,255,0.16);
+  backdrop-filter: blur(6px);
+}
+
+/* Responsive: 2x2 on small screens */
+@media (max-width: 900px){
+  .grid{ grid-template-columns: repeat(2, 1fr); }
+}
+</style>
+</head>
+
+<body>
+  <!-- Background -->
+  <div class="bg" aria-hidden="true">
+    <img src="./assets/backgrounds/sea.jpg" alt="">
+    <img src="./assets/backgrounds/forest.jpg" alt="">
+    <img src="./assets/backgrounds/waterfall.jpg" alt="">
+    <img src="./assets/backgrounds/sky.jpg" alt="">
+  </div>
+  <div class="stars" aria-hidden="true"></div>
+  <div class="ripples" aria-hidden="true"></div>
+  <div class="vignette" aria-hidden="true"></div>
+
+  <!-- Falling leaves -->
+  <canvas id="leaves"></canvas>
+
+  <!-- Content -->
+  <div class="wrap">
+    <div class="card">
+      <div class="header">
+        <div>
+          <h1>🌿 Moments</h1>
+          <p class="sub">Four screenshots together • falling leaves • water ripples</p>
+        </div>
+
+        <div class="controls">
+          <button type="button" onclick="history.back()">← Back</button>
+        </div>
+      </div>
+
+      <!-- 4 photos at the same time (one row, 4 columns) -->
+      <div class="grid">
+        <div class="tile">
+          <img src="./assets/1.png" alt="Screenshot 1">
+          <div class="caption">1</div>
+        </div>
+        <div class="tile">
+          <img src="./assets/2.png" alt="Screenshot 2">
+          <div class="caption">2</div>
+        </div>
+        <div class="tile">
+          <img src="./assets/3.png" alt="Screenshot 3">
+          <div class="caption">3</div>
+        </div>
+        <div class="tile">
+          <img src="./assets/4.png" alt="Screenshot 4">
+          <div class="caption">4</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+/* ===== Falling Leaves (Canvas) ===== */
+const canvas = document.getElementById("leaves");
+const ctx = canvas.getContext("2d", { alpha:true });
+
+function resize(){
+  canvas.width = window.innerWidth * devicePixelRatio;
+  canvas.height = window.innerHeight * devicePixelRatio;
+  canvas.style.width = window.innerWidth + "px";
+  canvas.style.height = window.innerHeight + "px";
+  ctx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0);
+}
+window.addEventListener("resize", resize);
+resize();
+
+function rand(min, max){ return Math.random() * (max - min) + min; }
+
+const leafColors = [
+  "rgba(255, 210, 120, 0.75)", // warm
+  "rgba(120, 255, 170, 0.55)", // green
+  "rgba(255, 150, 180, 0.55)", // pink-ish
+  "rgba(255, 255, 255, 0.30)"  // sparkle
+];
+
+const leaves = [];
+const LEAF_COUNT = Math.round(Math.min(70, Math.max(28, window.innerWidth / 22)));
+
+function makeLeaf(){
+  const size = rand(10, 26);
+  return {
+    x: rand(-40, window.innerWidth + 40),
+    y: rand(-window.innerHeight, -20),
+    r: size,
+    vx: rand(-0.35, 0.55),
+    vy: rand(0.6, 1.6),
+    spin: rand(-0.03, 0.03),
+    a: rand(0, Math.PI * 2),
+    sway: rand(14, 45),
+    color: leafColors[Math.floor(rand(0, leafColors.length))],
+    drift: rand(0.6, 1.6),
+  };
+}
+
+for(let i=0;i<LEAF_COUNT;i++) leaves.push(makeLeaf());
+
+function drawLeaf(l){
+  ctx.save();
+  ctx.translate(l.x, l.y);
+  ctx.rotate(l.a);
+  ctx.fillStyle = l.color;
+
+  // simple "leaf" shape (two arcs)
+  ctx.beginPath();
+  ctx.moveTo(0, -l.r);
+  ctx.quadraticCurveTo(l.r, -l.r * 0.2, 0, l.r);
+  ctx.quadraticCurveTo(-l.r, -l.r * 0.2, 0, -l.r);
+  ctx.closePath();
+  ctx.fill();
+
+  // mid vein
+  ctx.strokeStyle = "rgba(0,0,0,0.12)";
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(0, -l.r * 0.85);
+  ctx.lineTo(0, l.r * 0.85);
+  ctx.stroke();
+
+  ctx.restore();
+}
+
+let t = 0;
+function tick(){
+  t += 0.016;
+  ctx.clearRect(0,0,window.innerWidth, window.innerHeight);
+
+  for(const l of leaves){
+    l.y += l.vy;
+    l.x += l.vx + Math.sin(t * l.drift) * 0.15;
+    l.a += l.spin;
+
+    // gentle horizontal sway
+    l.x += Math.sin((l.y / 80) + l.a) * 0.15;
+
+    drawLeaf(l);
+
+    // recycle
+    if(l.y > window.innerHeight + 40){
+      l.y = rand(-120, -40);
+      l.x = rand(-40, window.innerWidth + 40);
+    }
+  }
+
+  requestAnimationFrame(tick);
+}
+tick();
+</script>
+</body>
+</html>
