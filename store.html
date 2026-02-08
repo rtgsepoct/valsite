@@ -21,7 +21,11 @@
       --lane-gap: 10px;
       --tile-radius: 12px;
       --tile-h: 130px;
-      --scroll-seconds: 14s; /* overall speed */
+      --scroll-seconds: 14s;
+
+      /* lane sizing (responsive) */
+      --lane-w: clamp(120px, 18vw, 280px);
+      --stage-gap: clamp(10px, 2vw, 18px);
     }
 
     *{ box-sizing:border-box; }
@@ -122,7 +126,7 @@
 
     /* FRAME OUTER CARD */
     .frame{
-      width: 100%;
+      width: 110%;
       padding: 16px;
       border-radius: 0 0 18px 18px;
       border: 1px solid var(--stroke);
@@ -132,13 +136,26 @@
     }
 
     .frame-inner{
-      position: relative;
-      width: 100%;
+      width: 130%;
       margin: 0 auto;
       max-width: 1200px;
     }
 
-    .frame-inner > img.frame-bg{
+    /* NEW: 3-column stage (LEFT LANE | FRAME | RIGHT LANE)
+       This guarantees lanes NEVER overlap the frame, on any screen size. */
+    .stage{
+      display:grid;
+      grid-template-columns: var(--lane-w) 1fr var(--lane-w);
+      gap: var(--stage-gap);
+      align-items: stretch; /* lanes match center height once JS sets --frame-h */
+    }
+
+    .frame-center{
+      position: relative;
+      width: 100%;
+    }
+
+    .frame-center > img.frame-bg{
       width: 100%;
       height: auto;
       max-height: 75vh;
@@ -148,27 +165,19 @@
       background: rgba(0,0,0,0.12);
     }
 
-    /* ========= LEFT & RIGHT AUTO SLIDERS (INSIDE FRAME) ========= */
-    .lanes{
-      position:absolute;
-      inset: 0;
-      pointer-events:none; /* important: doesn’t block clicks */
-    }
-
+    /* ========= LEFT & RIGHT AUTO SLIDERS (OUTSIDE FRAME) ========= */
     .lane{
-      position:absolute;
-      top: 10%;
-      bottom: 14%;
-      width: clamp(160px, 120vw, 350px);
+      pointer-events:none;
       overflow:hidden;
       border-radius: 14px;
       background: rgba(0,0,0,0.10);
       border: 1px solid rgba(255,255,255,0.10);
       backdrop-filter: blur(2px);
-    }
 
-    .lane.left{ left: clamp(20%, 6vw, 10%); }
-    .lane.right{ right: clamp(20%, 6vw, 10%); }
+      /* ✅ Height locked to the frame image height (set by JS) */
+      height: var(--frame-h, 300px);
+      max-height: 75vh;
+    }
 
     .lane-track{
       display:flex;
@@ -177,9 +186,11 @@
       padding: 10px;
       will-change: transform;
       animation: laneScroll var(--scroll-seconds) linear infinite;
+
+      /* ✅ Each track gets its own accurate loop distance from JS */
+      --loop: 600px;
     }
 
-    /* Right side scrolls opposite direction for nicer effect */
     .lane.right .lane-track{
       animation-direction: reverse;
     }
@@ -201,10 +212,10 @@
       display:block;
     }
 
-    /* The trick: we duplicate the list, then translate half the height */
+    /* ✅ Pixel-accurate scroll distance */
     @keyframes laneScroll{
       from { transform: translateY(0); }
-      to   { transform: translateY(-50%); }
+      to   { transform: translateY(calc(-1 * var(--loop))); }
     }
 
     /* ========= Celebration animations ========= */
@@ -253,17 +264,21 @@
     .fade-out{ animation: fadeOut 900ms ease forwards; }
     @keyframes fadeOut{ to { opacity:0; } }
 
-    /* Responsive: show 2 tiles at a time, slower scroll */
+    /* Responsive */
     @media (max-width: 768px){
       :root{
         --tile-h: 110px;
         --scroll-seconds: 18s;
+        --lane-w: clamp(92px, 20vw, 150px);
       }
-      .frame-inner > img.frame-bg{ max-height: 88vh; }
-      .lane{
-        width: clamp(105px, 20vw, 160px);
-        top: 20%;
-        bottom: 12%;
+      .frame-center > img.frame-bg{ max-height: 88vh; }
+      .lane{ max-height: 88vh; }
+    }
+
+    @media (max-width: 430px){
+      :root{
+        --lane-w: clamp(84px, 22vw, 120px);
+        --stage-gap: 10px;
       }
     }
 
@@ -282,6 +297,9 @@
   </style>
 </head>
 
+
+
+
 <body>
   <div class="overlay"></div>
   <div id="celebration" class="celebration"></div>
@@ -296,26 +314,30 @@
           <button onclick="history.back()" class="back-btn">← Back</button>
           <button id="playBtn">Play Music ▶</button>
           <button id="pauseBtn">Pause ⏸</button>
-
-          <!-- ✅ FIXED NEXT BUTTON -->
           <button type="button" id="nextBtn" class="next-btn">Next</button>
         </div>
       </div>
 
       <div class="frame">
         <div class="frame-inner">
-          <img class="frame-bg" src="./assets/Valentine's Day Frame.png" alt="Valentine frame">
 
-          <!-- ✅ sliders -->
-          <div class="lanes" aria-hidden="true">
-            <div class="lane left">
+          <!-- ✅ NEW STRUCTURE -->
+          <div class="stage">
+
+            <div class="lane left" aria-hidden="true">
               <div class="lane-track" id="leftTrack"></div>
             </div>
 
-            <div class="lane right">
+            <div class="frame-center">
+              <img id="frameImg" class="frame-bg" src="./assets/Valentine's Day Frame.png" alt="Valentine frame">
+            </div>
+
+            <div class="lane right" aria-hidden="true">
               <div class="lane-track" id="rightTrack"></div>
             </div>
+
           </div>
+          <!-- /stage -->
 
         </div>
       </div>
@@ -326,7 +348,6 @@
   <script>
     /* ========= NAVIGATION FIX ========= */
     document.getElementById("nextBtn").addEventListener("click", () => {
-      // Use relative path if timi.html is in same folder
       window.location.href = "./timi.html";
     });
 
@@ -337,8 +358,9 @@
 
     window.addEventListener("load", async () => {
       try { await music.play(); } catch (_) {}
-      startCelebration(80000);
+      startCelebration(400000);
       initLanes();
+      syncLaneHeightToFrame();
     });
 
     playBtn.addEventListener("click", async () => {
@@ -346,51 +368,91 @@
     });
     pauseBtn.addEventListener("click", () => music.pause());
 
-    /* ========= AUTO-SLIDING LANES =========
-       Put your photo paths here.
-       Rule: use 6–10+ images for smoothness.
-    */
+    /* ========= AUTO-SLIDING LANES ========= */
     const leftPhotos = [
-      "./assets/photos/left1.jpg",
-      "./assets/photos/left2.jpg",
-      "./assets/photos/left3.jpg",
-      "./assets/photos/left4.jpg",
-      "./assets/photos/left5.jpg",
-      "./assets/photos/left6.jpg",
+      "./assets/couplebirds.jpg",
+      "./assets/122just.jpg",
+      "./assets/larsa.jpg",
+      "./assets/lastone1.png",
+      "./assets/lovebirds3.jpg",
+      "./assets/moosite.jpeg",
     ];
 
     const rightPhotos = [
-      "./assets/photos/right1.jpg",
-      "./assets/photos/right2.jpg",
-      "./assets/photos/right3.jpg",
-      "./assets/photos/right4.jpg",
-      "./assets/photos/right5.jpg",
-      "./assets/photos/right6.jpg",
+      "./assets/couplebirds.jpg",
+      "./assets/122just.jpg",
+      "./assets/larsa.jpg",
+      "./assets/lastone1.png",
+      "./assets/lovebirds3.jpg",
+      "./assets/moosite.jpeg",
     ];
 
     function buildTrack(trackEl, photos){
-      // Duplicate list to make seamless loop
       const doubled = photos.concat(photos);
-
       trackEl.innerHTML = "";
+
+      const imgPromises = [];
+
       for(const src of doubled){
         const tile = document.createElement("div");
         tile.className = "tile";
+
         const img = document.createElement("img");
         img.src = src;
         img.alt = "photo";
         img.loading = "lazy";
+
+        // Track loading so we can compute correct height
+        imgPromises.push(new Promise((resolve) => {
+          if (img.complete) return resolve();
+          img.addEventListener("load", resolve, { once:true });
+          img.addEventListener("error", resolve, { once:true }); // don't block on missing images
+        }));
+
         tile.appendChild(img);
         trackEl.appendChild(tile);
       }
 
-      // Ensure animation distance is correct (-50%).
-      // This works because we doubled the list and the keyframes go to -50%.
+      return Promise.all(imgPromises).then(() => {
+        // After images render, compute exact loop distance (half the doubled list height)
+        // This fixes "left lane sometimes doesn't roll".
+        requestAnimationFrame(() => {
+          const half = Math.floor(trackEl.scrollHeight / 2);
+          // Guard: if something weird happens (too small), set a safe fallback
+          trackEl.style.setProperty("--loop", (half > 50 ? half : 600) + "px");
+        });
+      });
     }
 
-    function initLanes(){
-      buildTrack(document.getElementById("leftTrack"), leftPhotos);
-      buildTrack(document.getElementById("rightTrack"), rightPhotos);
+    async function initLanes(){
+      const leftTrack = document.getElementById("leftTrack");
+      const rightTrack = document.getElementById("rightTrack");
+
+      await Promise.all([
+        buildTrack(leftTrack, leftPhotos),
+        buildTrack(rightTrack, rightPhotos),
+      ]);
+    }
+
+    /* ✅ Keep lanes same height as frame image on all screen sizes */
+    function syncLaneHeightToFrame(){
+      const img = document.getElementById("frameImg");
+      const stage = document.querySelector(".stage");
+
+      const apply = () => {
+        const h = Math.round(img.getBoundingClientRect().height);
+        if (h > 0) stage.style.setProperty("--frame-h", h + "px");
+      };
+
+      // Initial + after image loads
+      if (img.complete) apply();
+      img.addEventListener("load", apply, { once:true });
+
+      // Keep in sync on resize
+      const ro = new ResizeObserver(apply);
+      ro.observe(img);
+
+      window.addEventListener("resize", apply, { passive:true });
     }
 
     /* ========= Celebration ========= */

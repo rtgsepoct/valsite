@@ -11,21 +11,24 @@
 
   <style>
     :root{
-      --bg1:#2a0b1f;
-      --bg2:#140610;
       --glass: rgba(255,255,255,0.12);
       --stroke: rgba(255,255,255,0.18);
       --text: #ffffff;
 
-      /* slider tuning */
+      /* background image (full-screen) */
+      --bg-img: url("assets/lastone1.png"); /* <-- put your main background image here */
+
+      /* sliders */
       --lane-gap: 10px;
       --tile-radius: 12px;
       --tile-h: 130px;
       --scroll-seconds: 14s;
 
-      /* lane sizing (responsive) */
-      --lane-w: clamp(120px, 18vw, 280px);
-      --stage-gap: clamp(10px, 2vw, 18px);
+      /* layout */
+      --lane-w: clamp(110px, 16vw, 260px);
+      --stage-gap: clamp(6px, 1vw, 12px);          /* ✅ reduce lane/center gap */
+      --frame-pad: clamp(10px, 1.2vw, 16px);
+      --top-strip-h: clamp(84px, 10vw, 120px);     /* ✅ new top division height */
     }
 
     *{ box-sizing:border-box; }
@@ -36,17 +39,30 @@
       font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
       color:var(--text);
       overflow:hidden;
+      background: #000;
+    }
+
+    /* ✅ Full-screen background image + subtle gradients on top */
+    body::before{
+      content:"";
+      position: fixed;
+      inset: 0;
       background:
-        radial-gradient(1200px 700px at 50% 55%, rgba(105,105,189,0.18), transparent 55%),
-        radial-gradient(900px 500px at 50% 35%, rgba(255,255,255,0.06), transparent 60%),
-        linear-gradient(135deg, var(--bg1), var(--bg2));
+        linear-gradient(180deg, rgba(0,0,0,0.35), rgba(0,0,0,0.62)),
+        var(--bg-img) center / cover no-repeat;
+      z-index: 0;
+      pointer-events:none;
+      transform: scale(1.02);
     }
 
     .overlay{
       position: fixed;
       inset: 0;
-      background: radial-gradient(circle at top, rgba(255,105,180,0.18), rgba(0,0,0,0.58));
-      z-index: 0;
+      background:
+        radial-gradient(1200px 700px at 50% 55%, rgba(105,105,189,0.18), transparent 55%),
+        radial-gradient(900px 500px at 50% 35%, rgba(255,255,255,0.06), transparent 60%),
+        radial-gradient(circle at top, rgba(255,105,180,0.18), rgba(0,0,0,0.25));
+      z-index: 1;
       pointer-events:none;
     }
 
@@ -58,28 +74,29 @@
       overflow:hidden;
     }
 
+    /* ✅ Make everything fit on screen and adapt */
     .wrap{
       position: relative;
       z-index: 2;
-      min-height: 200vh;
+      height: 100vh;
       display:flex;
       justify-content:center;
       align-items:flex-start;
-      padding: 24px 16px 50px;
+      padding: 18px 12px 18px;
       overflow:auto;
     }
 
     .column{
-      width: min(1500px, 100%);
+      width: min(1400px, 100%);
       display:flex;
       flex-direction:column;
-      gap: 1px;
+      gap: 10px;
     }
 
     .content{
       text-align:center;
-      padding: 1px 5px;
-      border-radius: 18px 18px 0 0;
+      padding: 14px 14px 10px;
+      border-radius: 18px;
       border: 1px solid var(--stroke);
       background: var(--glass);
       backdrop-filter: blur(10px);
@@ -87,9 +104,10 @@
     }
 
     h1{
-      margin:0 0 6px;
-      font-size: clamp(18px, 3vw, 28px);
+      margin:0 0 10px;
+      font-size: clamp(18px, 2.8vw, 28px);
       letter-spacing: 0.2px;
+      font-family: "Noto Sans Devanagari", system-ui, sans-serif;
     }
 
     .controls{
@@ -97,7 +115,6 @@
       justify-content:center;
       gap:10px;
       flex-wrap: wrap;
-      margin-top: 5px;
     }
 
     button{
@@ -114,21 +131,15 @@
     .back-btn{
       width: 90px;
       height:38px;
-      padding: 10px 14px;
-      border-radius: 999px;
       border: 1px solid rgba(255,255,255,0.18);
-      background:  rgba(30, 96, 218, 0.92);
-      color: white;
-      font-weight: 800;
-      cursor: pointer;
+      background: rgba(30, 96, 218, 0.92);
     }
-    .back-btn:hover{ background: rgba(0,0,0,0.85); }
 
-    /* FRAME OUTER CARD */
+    /* ✅ Frame card now clean (no 110%/130% overflow) */
     .frame{
-      width: 110%;
-      padding: 16px;
-      border-radius: 0 0 18px 18px;
+      width: 100%;
+      padding: var(--frame-pad);
+      border-radius: 18px;
       border: 1px solid var(--stroke);
       background: var(--glass);
       backdrop-filter: blur(10px);
@@ -136,36 +147,63 @@
     }
 
     .frame-inner{
-      width: 130%;
+      width: 100%;
       margin: 0 auto;
       max-width: 1200px;
     }
 
-    /* NEW: 3-column stage (LEFT LANE | FRAME | RIGHT LANE)
-       This guarantees lanes NEVER overlap the frame, on any screen size. */
+    /* ✅ NEW: top division (3 pictures) ABOVE the 3-lane stage */
+    .top-strip{
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: var(--stage-gap);
+      margin-bottom: var(--stage-gap);
+      height: var(--top-strip-h);
+    }
+
+    .top-strip .strip-tile{
+      border-radius: 14px;
+      overflow:hidden;
+      border: 1px solid rgba(255,255,255,0.14);
+      background: rgba(0,0,0,0.10);
+      box-shadow: 0 10px 24px rgba(0,0,0,0.25);
+    }
+    .top-strip img{
+      width:100%;
+      height:100%;
+      object-fit: cover;
+      display:block;
+    }
+
+    /* ✅ 3-column stage (LEFT | CENTER | RIGHT) */
     .stage{
       display:grid;
-      grid-template-columns: var(--lane-w) 1fr var(--lane-w);
+      grid-template-columns: minmax(92px, var(--lane-w)) minmax(0, 1fr) minmax(92px, var(--lane-w));
       gap: var(--stage-gap);
-      align-items: stretch; /* lanes match center height once JS sets --frame-h */
+      align-items: stretch;
     }
 
     .frame-center{
       position: relative;
       width: 100%;
+      border-radius: 14px;
+      overflow:hidden;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(0,0,0,0.10);
+      box-shadow: 0 18px 45px rgba(0,0,0,0.28);
     }
 
+    /* ✅ Make the “Valentine frame” fit the screen, without overflowing */
     .frame-center > img.frame-bg{
       width: 100%;
       height: auto;
-      max-height: 75vh;
+      max-height: calc(100vh - 240px); /* header + strip + padding (responsive enough) */
       display:block;
       object-fit: contain;
-      border-radius: 14px;
-      background: rgba(0,0,0,0.12);
+      background: rgba(0,0,0,0.08);
     }
 
-    /* ========= LEFT & RIGHT AUTO SLIDERS (OUTSIDE FRAME) ========= */
+    /* LEFT & RIGHT AUTO SLIDERS */
     .lane{
       pointer-events:none;
       overflow:hidden;
@@ -173,10 +211,8 @@
       background: rgba(0,0,0,0.10);
       border: 1px solid rgba(255,255,255,0.10);
       backdrop-filter: blur(2px);
-
-      /* ✅ Height locked to the frame image height (set by JS) */
-      height: var(--frame-h, 300px);
-      max-height: 75vh;
+      height: var(--frame-h, 320px);     /* ✅ locked to the center image height via JS */
+      max-height: calc(100vh - 240px);
     }
 
     .lane-track{
@@ -186,14 +222,10 @@
       padding: 10px;
       will-change: transform;
       animation: laneScroll var(--scroll-seconds) linear infinite;
-
-      /* ✅ Each track gets its own accurate loop distance from JS */
       --loop: 600px;
     }
 
-    .lane.right .lane-track{
-      animation-direction: reverse;
-    }
+    .lane.right .lane-track{ animation-direction: reverse; }
 
     .tile{
       width: 100%;
@@ -204,7 +236,6 @@
       border: 1px solid rgba(255,255,255,0.14);
       box-shadow: 0 10px 24px rgba(0,0,0,0.35);
     }
-
     .tile img{
       width:100%;
       height:100%;
@@ -212,13 +243,12 @@
       display:block;
     }
 
-    /* ✅ Pixel-accurate scroll distance */
     @keyframes laneScroll{
       from { transform: translateY(0); }
       to   { transform: translateY(calc(-1 * var(--loop))); }
     }
 
-    /* ========= Celebration animations ========= */
+    /* Celebration animations */
     .balloon{
       position:absolute;
       bottom:-120px;
@@ -265,49 +295,37 @@
     @keyframes fadeOut{ to { opacity:0; } }
 
     /* Responsive */
-    @media (max-width: 768px){
+    @media (max-width: 900px){
       :root{
         --tile-h: 110px;
         --scroll-seconds: 18s;
         --lane-w: clamp(92px, 20vw, 150px);
       }
-      .frame-center > img.frame-bg{ max-height: 88vh; }
-      .lane{ max-height: 88vh; }
+      .frame-center > img.frame-bg{ max-height: calc(100vh - 260px); }
+      .lane{ max-height: calc(100vh - 260px); }
     }
 
-    @media (max-width: 430px){
+    @media (max-width: 520px){
       :root{
         --lane-w: clamp(84px, 22vw, 120px);
-        --stage-gap: 10px;
+        --stage-gap: 8px;
+        --lane-gap: 8px;
       }
-    }
-
-    @font-face{
-      font-family: "NotoSansDevanagariLocal";
-      src: url("./assets/fonts/NotoSansDevanagari-Regular.ttf") format("truetype");
-      font-weight: 400;
-      font-style: normal;
-    }
-    @font-face{
-      font-family: "NotoSansDevanagariLocal";
-      src: url("./assets/fonts/NotoSansDevanagari-Bold.ttf") format("truetype");
-      font-weight: 700;
-      font-style: normal;
+      .top-strip{ grid-template-columns: 1fr 1fr; height: clamp(84px, 18vw, 120px); }
+      .top-strip .strip-tile:nth-child(3){ display:none; } /* keep it clean on tiny screens */
     }
   </style>
 </head>
-
-
-
 
 <body>
   <div class="overlay"></div>
   <div id="celebration" class="celebration"></div>
 
-  <audio id="music" src="./assets/music/folk_songs_1.mp3" loop></audio>
+  <audio id="music" src="assets/music/folk_songs_1.mp3" loop></audio>
 
   <div class="wrap">
     <div class="column">
+
       <div class="content">
         <h1>Happy Valentine’s Day! 💘</h1>
         <div class="controls">
@@ -321,7 +339,14 @@
       <div class="frame">
         <div class="frame-inner">
 
-          <!-- ✅ NEW STRUCTURE -->
+          <!-- ✅ NEW: top division above everything (3-picture strip) -->
+          <div class="top-strip" aria-label="Top photo strip">
+            <div class="strip-tile"><img id="strip1" alt="top photo 1"></div>
+            <div class="strip-tile"><img id="strip2" alt="top photo 2"></div>
+            <div class="strip-tile"><img id="strip3" alt="top photo 3"></div>
+          </div>
+
+          <!-- ✅ 3-lane stage -->
           <div class="stage">
 
             <div class="lane left" aria-hidden="true">
@@ -329,7 +354,7 @@
             </div>
 
             <div class="frame-center">
-              <img id="frameImg" class="frame-bg" src="./assets/Valentine's Day Frame.png" alt="Valentine frame">
+              <img id="frameImg" class="frame-bg" src="assets/Valentine's Day Frame.png" alt="Valentine frame">
             </div>
 
             <div class="lane right" aria-hidden="true">
@@ -346,7 +371,7 @@
   </div>
 
   <script>
-    /* ========= NAVIGATION FIX ========= */
+    /* ========= NAVIGATION ========= */
     document.getElementById("nextBtn").addEventListener("click", () => {
       window.location.href = "./timi.html";
     });
@@ -359,7 +384,9 @@
     window.addEventListener("load", async () => {
       try { await music.play(); } catch (_) {}
       startCelebration(400000);
-      initLanes();
+
+      initTopStrip();
+      await initLanes();
       syncLaneHeightToFrame();
     });
 
@@ -368,29 +395,39 @@
     });
     pauseBtn.addEventListener("click", () => music.pause());
 
-    /* ========= AUTO-SLIDING LANES ========= */
+    /* ========= PHOTOS ========= */
     const leftPhotos = [
-      "./assets/couplebirds.jpg",
-      "./assets/122just.jpg",
-      "./assets/larsa.jpg",
-      "./assets/lastone1.png",
-      "./assets/lovebirds3.jpg",
-      "./assets/moosite.jpeg",
+      "assets/couplebirds.jpg",
+      "assets/122just.jpg",
+      "assets/larsa.jpg",
+      "assets/lastone1.png",
+      "assets/lovebirds3.jpg",
+      "assets/moosite.jpeg",
     ];
 
     const rightPhotos = [
-      "./assets/couplebirds.jpg",
-      "./assets/122just.jpg",
-      "./assets/larsa.jpg",
-      "./assets/lastone1.png",
-      "./assets/lovebirds3.jpg",
-      "./assets/moosite.jpeg",
+      "assets/couplebirds.jpg",
+      "assets/122just.jpg",
+      "assets/larsa.jpg",
+      "assets/lastone1.png",
+      "assets/lovebirds3.jpg",
+      "assets/moosite.jpeg",
     ];
 
+    function initTopStrip(){
+      // Use the first 3 images (change these if you want different ones)
+      const a = leftPhotos[0] || "assets/lovebirds3.jpg";
+      const b = leftPhotos[1] || "assets/lastone1.png";
+      const c = leftPhotos[2] || "assets/couplebirds.jpg";
+      document.getElementById("strip1").src = a;
+      document.getElementById("strip2").src = b;
+      document.getElementById("strip3").src = c;
+    }
+
+    /* ========= AUTO-SLIDING LANES ========= */
     function buildTrack(trackEl, photos){
       const doubled = photos.concat(photos);
       trackEl.innerHTML = "";
-
       const imgPromises = [];
 
       for(const src of doubled){
@@ -402,11 +439,10 @@
         img.alt = "photo";
         img.loading = "lazy";
 
-        // Track loading so we can compute correct height
         imgPromises.push(new Promise((resolve) => {
           if (img.complete) return resolve();
           img.addEventListener("load", resolve, { once:true });
-          img.addEventListener("error", resolve, { once:true }); // don't block on missing images
+          img.addEventListener("error", resolve, { once:true });
         }));
 
         tile.appendChild(img);
@@ -414,11 +450,8 @@
       }
 
       return Promise.all(imgPromises).then(() => {
-        // After images render, compute exact loop distance (half the doubled list height)
-        // This fixes "left lane sometimes doesn't roll".
         requestAnimationFrame(() => {
           const half = Math.floor(trackEl.scrollHeight / 2);
-          // Guard: if something weird happens (too small), set a safe fallback
           trackEl.style.setProperty("--loop", (half > 50 ? half : 600) + "px");
         });
       });
@@ -427,14 +460,13 @@
     async function initLanes(){
       const leftTrack = document.getElementById("leftTrack");
       const rightTrack = document.getElementById("rightTrack");
-
       await Promise.all([
         buildTrack(leftTrack, leftPhotos),
         buildTrack(rightTrack, rightPhotos),
       ]);
     }
 
-    /* ✅ Keep lanes same height as frame image on all screen sizes */
+    /* ✅ Keep lane height exactly equal to the center image height */
     function syncLaneHeightToFrame(){
       const img = document.getElementById("frameImg");
       const stage = document.querySelector(".stage");
@@ -444,11 +476,9 @@
         if (h > 0) stage.style.setProperty("--frame-h", h + "px");
       };
 
-      // Initial + after image loads
       if (img.complete) apply();
       img.addEventListener("load", apply, { once:true });
 
-      // Keep in sync on resize
       const ro = new ResizeObserver(apply);
       ro.observe(img);
 
@@ -530,7 +560,6 @@
       setTimeout(() => {
         clearInterval(balloonTimer);
         clearInterval(fireworkTimer);
-
         layer.classList.add("fade-out");
         setTimeout(() => {
           layer.innerHTML = "";
