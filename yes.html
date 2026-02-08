@@ -2,7 +2,8 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <!-- ✅ allow zoom + fix mobile viewport behavior -->
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=yes, maximum-scale=5" />
   <title>Yay! 💖</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -15,8 +16,8 @@
       --stroke: rgba(255,255,255,0.18);
       --text: #ffffff;
 
-      /* background image (full-screen) */
-      --bg-img: url("assets/lastone1.png"); /* <-- put your main background image here */
+      /* ✅ full-screen background image */
+      --bg-img: url("assets/lastone1.png");
 
       /* sliders */
       --lane-gap: 10px;
@@ -26,23 +27,32 @@
 
       /* layout */
       --lane-w: clamp(110px, 16vw, 260px);
-      --stage-gap: clamp(6px, 1vw, 12px);          /* ✅ reduce lane/center gap */
+      --stage-gap: clamp(6px, 1vw, 12px);
       --frame-pad: clamp(10px, 1.2vw, 16px);
-      --top-strip-h: clamp(84px, 10vw, 120px);     /* ✅ new top division height */
+
+      /* top strip */
+      --top-strip-h: clamp(84px, 10vw, 120px);
     }
 
     *{ box-sizing:border-box; }
 
+    html, body { height: 100%; }
+
     body{
       margin:0;
-      min-height:100vh;
+      min-height:100%;
       font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
       color:var(--text);
-      overflow:hidden;
+
+      /* ✅ IMPORTANT: do NOT hide vertical overflow on mobile */
+      overflow-x: hidden;
+      overflow-y: auto;
+
       background: #000;
+      -webkit-text-size-adjust: 100%;
     }
 
-    /* ✅ Full-screen background image + subtle gradients on top */
+    /* ✅ Background image covers entire screen */
     body::before{
       content:"";
       position: fixed;
@@ -74,16 +84,22 @@
       overflow:hidden;
     }
 
-    /* ✅ Make everything fit on screen and adapt */
+    /* ✅ Use svh/dvh-safe viewport sizing.
+       - 100svh is “small viewport height” (stable when address bar changes)
+       - fallback to 100vh automatically if unsupported */
     .wrap{
       position: relative;
       z-index: 2;
-      height: 100vh;
+
+      min-height: 100svh;
+      padding: 18px 12px 24px;
+
       display:flex;
       justify-content:center;
       align-items:flex-start;
-      padding: 18px 12px 18px;
-      overflow:auto;
+
+      /* ✅ allow scrolling */
+      overflow: visible;
     }
 
     .column{
@@ -125,6 +141,7 @@
       cursor:pointer;
       background: rgba(30, 96, 218, 0.92);
       color: #fff;
+      touch-action: manipulation;
     }
     button:active{ transform: translateY(1px); }
 
@@ -135,7 +152,7 @@
       background: rgba(30, 96, 218, 0.92);
     }
 
-    /* ✅ Frame card now clean (no 110%/130% overflow) */
+    /* FRAME OUTER */
     .frame{
       width: 100%;
       padding: var(--frame-pad);
@@ -152,7 +169,7 @@
       max-width: 1200px;
     }
 
-    /* ✅ NEW: top division (3 pictures) ABOVE the 3-lane stage */
+    /* ✅ TOP DIVISION (3 pictures above the whole stage) */
     .top-strip{
       display: grid;
       grid-template-columns: 1fr 1fr 1fr;
@@ -175,13 +192,18 @@
       display:block;
     }
 
-    /* ✅ 3-column stage (LEFT | CENTER | RIGHT) */
+    /* ✅ STAGE LAYOUT with named areas */
     .stage{
       display:grid;
       grid-template-columns: minmax(92px, var(--lane-w)) minmax(0, 1fr) minmax(92px, var(--lane-w));
+      grid-template-areas: "left frame right";
       gap: var(--stage-gap);
       align-items: stretch;
     }
+
+    .lane.left  { grid-area: left; }
+    .lane.right { grid-area: right; }
+    .frame-center { grid-area: frame; }
 
     .frame-center{
       position: relative;
@@ -193,11 +215,12 @@
       box-shadow: 0 18px 45px rgba(0,0,0,0.28);
     }
 
-    /* ✅ Make the “Valentine frame” fit the screen, without overflowing */
+    /* ✅ The center frame should never “vanish” due to max-height.
+       Use svh and let page scroll if needed. */
     .frame-center > img.frame-bg{
       width: 100%;
       height: auto;
-      max-height: calc(100vh - 240px); /* header + strip + padding (responsive enough) */
+      max-height: 70svh;
       display:block;
       object-fit: contain;
       background: rgba(0,0,0,0.08);
@@ -211,8 +234,10 @@
       background: rgba(0,0,0,0.10);
       border: 1px solid rgba(255,255,255,0.10);
       backdrop-filter: blur(2px);
-      height: var(--frame-h, 320px);     /* ✅ locked to the center image height via JS */
-      max-height: calc(100vh - 240px);
+
+      /* ✅ default: match center frame height via JS */
+      height: var(--frame-h, 320px);
+      max-height: 70svh;
     }
 
     .lane-track{
@@ -294,25 +319,43 @@
     .fade-out{ animation: fadeOut 900ms ease forwards; }
     @keyframes fadeOut{ to { opacity:0; } }
 
-    /* Responsive */
-    @media (max-width: 900px){
+    /* ✅ MOBILE REFLOW:
+       Center frame stays big; lanes move BELOW and become 2 columns.
+       This prevents “tiny columns” + vanishing feeling. */
+    @media (max-width: 640px){
       :root{
         --tile-h: 110px;
         --scroll-seconds: 18s;
-        --lane-w: clamp(92px, 20vw, 150px);
+        --lane-w: 1fr; /* not used in mobile layout */
+        --stage-gap: 10px;
       }
-      .frame-center > img.frame-bg{ max-height: calc(100vh - 260px); }
-      .lane{ max-height: calc(100vh - 260px); }
+
+      .top-strip{
+        grid-template-columns: 1fr 1fr;
+        height: clamp(84px, 18vw, 120px);
+      }
+      .top-strip .strip-tile:nth-child(3){ display:none; }
+
+      .stage{
+        grid-template-columns: 1fr 1fr;
+        grid-template-areas:
+          "frame frame"
+          "left  right";
+      }
+
+      /* On mobile, lanes should be a reasonable height, not forced to the big frame height */
+      .lane{
+        height: clamp(180px, 28svh, 280px);
+        max-height: none;
+      }
+      .frame-center > img.frame-bg{
+        max-height: 52svh; /* keep it visible above lanes */
+      }
     }
 
-    @media (max-width: 520px){
-      :root{
-        --lane-w: clamp(84px, 22vw, 120px);
-        --stage-gap: 8px;
-        --lane-gap: 8px;
-      }
-      .top-strip{ grid-template-columns: 1fr 1fr; height: clamp(84px, 18vw, 120px); }
-      .top-strip .strip-tile:nth-child(3){ display:none; } /* keep it clean on tiny screens */
+    @media (prefers-reduced-motion: reduce){
+      .lane-track{ animation: none; }
+      .celebration{ display:none; }
     }
   </style>
 </head>
@@ -339,16 +382,13 @@
       <div class="frame">
         <div class="frame-inner">
 
-          <!-- ✅ NEW: top division above everything (3-picture strip) -->
           <div class="top-strip" aria-label="Top photo strip">
             <div class="strip-tile"><img id="strip1" alt="top photo 1"></div>
             <div class="strip-tile"><img id="strip2" alt="top photo 2"></div>
             <div class="strip-tile"><img id="strip3" alt="top photo 3"></div>
           </div>
 
-          <!-- ✅ 3-lane stage -->
           <div class="stage">
-
             <div class="lane left" aria-hidden="true">
               <div class="lane-track" id="leftTrack"></div>
             </div>
@@ -360,9 +400,7 @@
             <div class="lane right" aria-hidden="true">
               <div class="lane-track" id="rightTrack"></div>
             </div>
-
           </div>
-          <!-- /stage -->
 
         </div>
       </div>
@@ -371,15 +409,18 @@
   </div>
 
   <script>
-    /* ========= NAVIGATION ========= */
+    /* NAVIGATION */
     document.getElementById("nextBtn").addEventListener("click", () => {
       window.location.href = "./timi.html";
     });
 
-    /* ========= MUSIC ========= */
+    /* MUSIC */
     const music = document.getElementById("music");
     const playBtn = document.getElementById("playBtn");
     const pauseBtn = document.getElementById("pauseBtn");
+
+    playBtn.addEventListener("click", async () => { try { await music.play(); } catch {} });
+    pauseBtn.addEventListener("click", () => music.pause());
 
     window.addEventListener("load", async () => {
       try { await music.play(); } catch (_) {}
@@ -387,15 +428,10 @@
 
       initTopStrip();
       await initLanes();
-      syncLaneHeightToFrame();
+      syncLaneHeightToFrame(); // desktop only (mobile uses fixed lane height)
     });
 
-    playBtn.addEventListener("click", async () => {
-      try { await music.play(); } catch (_) {}
-    });
-    pauseBtn.addEventListener("click", () => music.pause());
-
-    /* ========= PHOTOS ========= */
+    /* PHOTOS */
     const leftPhotos = [
       "assets/couplebirds.jpg",
       "assets/122just.jpg",
@@ -415,7 +451,6 @@
     ];
 
     function initTopStrip(){
-      // Use the first 3 images (change these if you want different ones)
       const a = leftPhotos[0] || "assets/lovebirds3.jpg";
       const b = leftPhotos[1] || "assets/lastone1.png";
       const c = leftPhotos[2] || "assets/couplebirds.jpg";
@@ -424,7 +459,7 @@
       document.getElementById("strip3").src = c;
     }
 
-    /* ========= AUTO-SLIDING LANES ========= */
+    /* AUTO-SLIDING LANES */
     function buildTrack(trackEl, photos){
       const doubled = photos.concat(photos);
       trackEl.innerHTML = "";
@@ -466,12 +501,14 @@
       ]);
     }
 
-    /* ✅ Keep lane height exactly equal to the center image height */
+    /* Match lane height to center frame height (DESKTOP only) */
     function syncLaneHeightToFrame(){
       const img = document.getElementById("frameImg");
       const stage = document.querySelector(".stage");
+      const mq = window.matchMedia("(max-width: 640px)");
 
       const apply = () => {
+        if (mq.matches) return; // mobile uses fixed lane height from CSS
         const h = Math.round(img.getBoundingClientRect().height);
         if (h > 0) stage.style.setProperty("--frame-h", h + "px");
       };
@@ -483,9 +520,10 @@
       ro.observe(img);
 
       window.addEventListener("resize", apply, { passive:true });
+      mq.addEventListener?.("change", apply);
     }
 
-    /* ========= Celebration ========= */
+    /* Celebration */
     const layer = document.getElementById("celebration");
     function rand(min, max){ return Math.random() * (max - min) + min; }
     function pick(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
