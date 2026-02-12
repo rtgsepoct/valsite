@@ -15,27 +15,28 @@
       --stroke: rgba(255,255,255,0.18);
       --text: #ffffff;
 
+      /* background */
       --bg-img: url("assets/moon5.jpeg");
 
+      /* sliders */
       --lane-gap: 10px;
       --tile-radius: 12px;
       --tile-h: 130px;
       --scroll-seconds: 14s;
 
+      /* layout */
       --lane-w: clamp(110px, 16vw, 260px);
       --stage-gap: clamp(6px, 1vw, 12px);
       --frame-pad: clamp(10px, 1.2vw, 16px);
 
+      /* ✅ Header overlay sizing */
       --header-top: 14px;
       --header-pad-y: 14px;
-      --header-gap-under: 110px;
+      --header-gap-under: 110px; /* how much space to reserve under fixed header */
 
-      /* Base top strip sizing */
-      --top-strip-ar: 16 / 6;
-      --top-strip-minh: 96px;
-
-      /* ✅ Make top 1 and top 3 bigger (towards sliders) */
-      --top-edge-bonus: 26px; /* increase/decrease this */
+      /* ✅ Top strip sizing (edit anytime) */
+      --top-strip-ar: 16 / 6;     /* change to 16/7 or 16/9 for taller tiles */
+      --top-strip-minh: 96px;     /* minimum tile height */
     }
 
     *{ box-sizing:border-box; }
@@ -52,6 +53,7 @@
       -webkit-text-size-adjust: 100%;
     }
 
+    /* background image */
     body::before{
       content:"";
       position: fixed;
@@ -87,7 +89,7 @@
       position: relative;
       z-index: 2;
       min-height: 100svh;
-      padding: 8px 12px 24px;
+      padding: 8px 12px 24px; /* higher */
       display:flex;
       justify-content:center;
       align-items:flex-start;
@@ -101,7 +103,7 @@
       gap: 10px;
     }
 
-    /* fixed centered header */
+    /* ✅ FIXED, CENTERED HEADER (no longer pushes content down) */
     .content{
       position: fixed;
       left: 50%;
@@ -152,6 +154,7 @@
       background: rgba(30, 96, 218, 0.92);
     }
 
+    /* FRAME OUTER */
     .frame{
       width: 100%;
       padding: var(--frame-pad);
@@ -160,6 +163,8 @@
       background: var(--glass);
       backdrop-filter: blur(10px);
       box-shadow: 0 20px 70px rgba(0,0,0,0.45);
+
+      /* ✅ reserve space for fixed header (adjust to push strip up/down) */
       margin-top: var(--header-gap-under);
     }
 
@@ -169,12 +174,12 @@
       max-width: 1200px;
     }
 
-    /* TOP STRIP */
+    /* ✅ TOP STRIP (responsive for any screen size) */
     .top-strip{
       display: grid;
       gap: var(--stage-gap);
       margin-bottom: var(--stage-gap);
-      grid-template-columns: repeat(3, 1fr); /* keep 3 columns so we can target 1 & 3 */
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
     }
 
     .top-strip .strip-tile{
@@ -183,26 +188,16 @@
       border: 1px solid rgba(255,255,255,0.14);
       background: rgba(0,0,0,0.10);
       box-shadow: 0 10px 24px rgba(0,0,0,0.25);
+
+      /* ✅ adjust height using variables above */
       aspect-ratio: var(--top-strip-ar);
       min-height: var(--top-strip-minh);
-    }
-
-    /* ✅ Make TOP 1 and TOP 3 taller (towards the slider below) */
-    .top-strip .strip-tile.edge{
-      min-height: calc(var(--top-strip-minh) + var(--top-edge-bonus));
-      aspect-ratio: 16 / 7; /* slightly taller so more of the image is visible */
-    }
-
-    /* ✅ Show whole image (no crop) for 1 and 3 */
-    .top-strip .strip-tile.edge img{
-      object-fit: contain;          /* show full image */
-      background: rgba(0,0,0,0.18); /* fill empty bars nicely */
     }
 
     .top-strip img{
       width:100%;
       height:100%;
-      object-fit: cover; /* default for middle tile */
+      object-fit: cover;
       display:block;
     }
 
@@ -238,7 +233,7 @@
       background: rgba(0,0,0,0.08);
     }
 
-    /* SLIDERS */
+    /* LEFT & RIGHT AUTO SLIDERS */
     .lane{
       pointer-events:none;
       overflow:hidden;
@@ -283,7 +278,7 @@
       to   { transform: translateY(calc(-1 * var(--loop))); }
     }
 
-    /* Celebration (unchanged) */
+    /* Celebration animations */
     .balloon{
       position:absolute;
       bottom:-120px;
@@ -329,6 +324,7 @@
     .fade-out{ animation: fadeOut 900ms ease forwards; }
     @keyframes fadeOut{ to { opacity:0; } }
 
+    /* ✅ MOBILE */
     @media (max-width: 640px){
       :root{
         --tile-h: 110px;
@@ -336,19 +332,13 @@
         --lane-w: 1fr;
         --stage-gap: 10px;
 
-        --header-gap-under: 118px;
+        --header-gap-under: 118px; /* small tweak for mobile */
         --top-strip-minh: 92px;
-        --top-strip-ar: 16 / 7;
-
-        --top-edge-bonus: 18px; /* smaller bump on mobile */
+        --top-strip-ar: 16 / 7;    /* slightly taller on phones */
       }
 
       .top-strip{
-        grid-template-columns: 1fr; /* stack for small screens */
-      }
-
-      .top-strip .strip-tile{
-        aspect-ratio: 16 / 7;
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
       }
 
       .stage{
@@ -383,6 +373,7 @@
   <div class="wrap">
     <div class="column">
 
+      <!-- ✅ fixed overlay header -->
       <div class="content">
         <h1>Happy Valentine’s Day! 💘</h1>
         <div class="controls">
@@ -397,10 +388,9 @@
         <div class="frame-inner">
 
           <div class="top-strip" aria-label="Top photo strip">
-            <!-- ✅ edge class on 1 and 3 -->
-            <div class="strip-tile edge"><img id="strip1" alt="top photo 1"></div>
+            <div class="strip-tile"><img id="strip1" alt="top photo 1"></div>
             <div class="strip-tile"><img id="strip2" alt="top photo 2"></div>
-            <div class="strip-tile edge"><img id="strip3" alt="top photo 3"></div>
+            <div class="strip-tile"><img id="strip3" alt="top photo 3"></div>
           </div>
 
           <div class="stage">
@@ -446,13 +436,16 @@
       syncLaneHeightToFrame();
     });
 
-    /* PHOTOS */
+    /* ✅ PHOTOS */
+
+    // Top strip (must exist exactly in /assets/)
     const topPhotos = [
       "assets/small1.png",
       "assets/small2.png",
       "assets/moon2.jpeg",
     ];
 
+    // Lanes (make sure these filenames are correct!)
     const leftPhotos = [
       "assets/couple2birds.jpg",
       "assets/122just.jpg",
@@ -471,6 +464,7 @@
       "assets/moosite.jpeg",
     ];
 
+    /* Top strip loader: logs errors (no repeating fallback) */
     function setImgOrLog(id, src){
       const el = document.getElementById(id);
       el.onload  = () => console.log(`[OK] ${id} loaded:`, src);
