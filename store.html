@@ -15,16 +15,28 @@
       --stroke: rgba(255,255,255,0.18);
       --text: #ffffff;
 
+      /* background */
       --bg-img: url("assets/moon5.jpeg");
 
+      /* sliders */
       --lane-gap: 10px;
       --tile-radius: 12px;
       --tile-h: 130px;
       --scroll-seconds: 14s;
 
+      /* layout */
       --lane-w: clamp(110px, 16vw, 260px);
       --stage-gap: clamp(6px, 1vw, 12px);
       --frame-pad: clamp(10px, 1.2vw, 16px);
+
+      /* ✅ Header overlay sizing */
+      --header-top: 14px;
+      --header-pad-y: 14px;
+      --header-gap-under: 110px; /* how much space to reserve under fixed header */
+
+      /* ✅ Top strip sizing (edit anytime) */
+      --top-strip-ar: 16 / 6;     /* change to 16/7 or 16/9 for taller tiles */
+      --top-strip-minh: 96px;     /* minimum tile height */
     }
 
     *{ box-sizing:border-box; }
@@ -41,6 +53,7 @@
       -webkit-text-size-adjust: 100%;
     }
 
+    /* background image */
     body::before{
       content:"";
       position: fixed;
@@ -76,7 +89,7 @@
       position: relative;
       z-index: 2;
       min-height: 100svh;
-      padding: 18px 12px 24px;
+      padding: 8px 12px 24px; /* higher */
       display:flex;
       justify-content:center;
       align-items:flex-start;
@@ -90,9 +103,17 @@
       gap: 10px;
     }
 
+    /* ✅ FIXED, CENTERED HEADER (no longer pushes content down) */
     .content{
+      position: fixed;
+      left: 50%;
+      top: var(--header-top);
+      transform: translateX(-50%);
+      width: min(1400px, calc(100% - 24px));
+      z-index: 80;
+
       text-align:center;
-      padding: 14px 14px 10px;
+      padding: var(--header-pad-y) 14px 10px;
       border-radius: 18px;
       border: 1px solid var(--stroke);
       background: var(--glass);
@@ -133,6 +154,7 @@
       background: rgba(30, 96, 218, 0.92);
     }
 
+    /* FRAME OUTER */
     .frame{
       width: 100%;
       padding: var(--frame-pad);
@@ -141,6 +163,9 @@
       background: var(--glass);
       backdrop-filter: blur(10px);
       box-shadow: 0 20px 70px rgba(0,0,0,0.45);
+
+      /* ✅ reserve space for fixed header (adjust to push strip up/down) */
+      margin-top: var(--header-gap-under);
     }
 
     .frame-inner{
@@ -149,7 +174,7 @@
       max-width: 1200px;
     }
 
-    /* ✅ TOP STRIP (responsive; works on any screen size) */
+    /* ✅ TOP STRIP (responsive for any screen size) */
     .top-strip{
       display: grid;
       gap: var(--stage-gap);
@@ -163,8 +188,10 @@
       border: 1px solid rgba(255,255,255,0.14);
       background: rgba(0,0,0,0.10);
       box-shadow: 0 10px 24px rgba(0,0,0,0.25);
-      aspect-ratio: 16 / 6;
-      min-height: 84px;
+
+      /* ✅ adjust height using variables above */
+      aspect-ratio: var(--top-strip-ar);
+      min-height: var(--top-strip-minh);
     }
 
     .top-strip img{
@@ -174,6 +201,7 @@
       display:block;
     }
 
+    /* STAGE */
     .stage{
       display:grid;
       grid-template-columns: minmax(92px, var(--lane-w)) minmax(0, 1fr) minmax(92px, var(--lane-w));
@@ -205,6 +233,7 @@
       background: rgba(0,0,0,0.08);
     }
 
+    /* LEFT & RIGHT AUTO SLIDERS */
     .lane{
       pointer-events:none;
       overflow:hidden;
@@ -249,6 +278,7 @@
       to   { transform: translateY(calc(-1 * var(--loop))); }
     }
 
+    /* Celebration animations */
     .balloon{
       position:absolute;
       bottom:-120px;
@@ -301,9 +331,12 @@
         --scroll-seconds: 18s;
         --lane-w: 1fr;
         --stage-gap: 10px;
+
+        --header-gap-under: 118px; /* small tweak for mobile */
+        --top-strip-minh: 92px;
+        --top-strip-ar: 16 / 7;    /* slightly taller on phones */
       }
 
-      /* ✅ Keep ALL 3 top photos visible (no hiding) */
       .top-strip{
         grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
       }
@@ -319,7 +352,6 @@
         height: clamp(180px, 28svh, 280px);
         max-height: none;
       }
-
       .frame-center > img.frame-bg{
         max-height: 52svh;
       }
@@ -341,6 +373,7 @@
   <div class="wrap">
     <div class="column">
 
+      <!-- ✅ fixed overlay header -->
       <div class="content">
         <h1>Happy Valentine’s Day! 💘</h1>
         <div class="controls">
@@ -405,14 +438,14 @@
 
     /* ✅ PHOTOS */
 
-    // ✅ Top strip: exactly these 3 (must exist in /assets/)
+    // Top strip (must exist exactly in /assets/)
     const topPhotos = [
       "assets/small1.png",
-      "assets/small_2.png",
-      "assets/moon2.jpeg"
+      "assets/small2.png",
+      "assets/moon2.jpeg",
     ];
 
-    // ⚠️ If these filenames are not real, lanes will show broken icons
+    // Lanes (make sure these filenames are correct!)
     const leftPhotos = [
       "assets/couple2birds.jpg",
       "assets/122just.jpg",
@@ -431,14 +464,12 @@
       "assets/moosite.jpeg",
     ];
 
-    // ✅ No pigeon fallback (so you can see what fails)
+    /* Top strip loader: logs errors (no repeating fallback) */
     function setImgOrLog(id, src){
       const el = document.getElementById(id);
       el.onload  = () => console.log(`[OK] ${id} loaded:`, src);
       el.onerror = () => console.error(`[FAIL] ${id} missing/not reachable:`, src);
-
-      // cache-bust while testing
-      el.src = src + "?v=" + Date.now();
+      el.src = src;
     }
 
     function initTopStrip(){
