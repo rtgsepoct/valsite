@@ -17,7 +17,7 @@
       --text: #ffffff;
 
       /* ✅ full-screen background image */
-      --bg-img: url("assets/lastone1.png");
+      --bg-img: url("assets/moon5.jpeg");
 
       /* sliders */
       --lane-gap: 10px;
@@ -172,19 +172,27 @@
     /* ✅ TOP DIVISION (3 pictures above the whole stage) */
     .top-strip{
       display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
       gap: var(--stage-gap);
       margin-bottom: var(--stage-gap);
       height: var(--top-strip-h);
+
+      /* auto-fit makes it responsive without special breakpoints */
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
     }
 
     .top-strip .strip-tile{
       border-radius: 14px;
-      overflow:hidden;
+      overflow: hidden;
       border: 1px solid rgba(255,255,255,0.14);
       background: rgba(0,0,0,0.10);
       box-shadow: 0 10px 24px rgba(0,0,0,0.25);
+
+      /* ✅ consistent “photo card” sizing */
+      aspect-ratio: 16 / 6;       /* wide strip; change to 16/9 if you want taller */
+      min-height: 84px;
     }
+
+
     .top-strip img{
       width:100%;
       height:100%;
@@ -433,7 +441,7 @@
 
     /* PHOTOS */
     const leftPhotos = [
-      "assets/couplebirds.jpg",
+      "assets/couple2birds.jpg",
       "assets/122just.jpg",
       "assets/larsa.jpg",
       "assets/lastone1.png",
@@ -442,7 +450,7 @@
     ];
 
     const rightPhotos = [
-      "assets/couplebirds.jpg",
+      "assets/coupleb2irds.jpg",
       "assets/122just.jpg",
       "assets/larsa.jpg",
       "assets/lastone1.png",
@@ -450,14 +458,37 @@
       "assets/moosite.jpeg",
     ];
 
-    function initTopStrip(){
-      const a = leftPhotos[0] || "assets/lovebirds3.jpg";
-      const b = leftPhotos[1] || "assets/lastone1.png";
-      const c = leftPhotos[2] || "assets/couplebirds.jpg";
-      document.getElementById("strip1").src = a;
-      document.getElementById("strip2").src = b;
-      document.getElementById("strip3").src = c;
+    function setImg(id, src, fallback){
+      const el = document.getElementById(id);
+
+      // show fallback if the real image fails
+      el.onerror = () => {
+        console.error(`[TOP STRIP] Failed to load: ${src}`);
+        el.src = fallback;
+      };
+
+      // also log success so you can confirm
+      el.onload = () => console.log(`[TOP STRIP] Loaded: ${src}`);
+
+      el.src = src;
     }
+
+    function initTopStrip(){
+      // ✅ Define the 3 top images explicitly (no ambiguity)
+      const topPhotos = [
+        "assets/small2.png",  // pigeons
+        "assets/small1.png",
+        "assets/moon2.jpeg"
+      ];
+
+      // ✅ Use a known-good fallback (pick something you KNOW loads)
+      const fallback = "assets/couplebirds.jpg";
+
+      setImg("strip1", topPhotos[0], fallback);
+      setImg("strip2", topPhotos[1], fallback);
+      setImg("strip3", topPhotos[2], fallback);
+    }
+
 
     /* AUTO-SLIDING LANES */
     function buildTrack(trackEl, photos){

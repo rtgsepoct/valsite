@@ -2,7 +2,6 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <!-- ✅ allow zoom + fix mobile viewport behavior -->
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=yes, maximum-scale=5" />
   <title>Yay! 💖</title>
 
@@ -16,26 +15,19 @@
       --stroke: rgba(255,255,255,0.18);
       --text: #ffffff;
 
-      /* ✅ full-screen background image */
       --bg-img: url("assets/moon5.jpeg");
 
-      /* sliders */
       --lane-gap: 10px;
       --tile-radius: 12px;
       --tile-h: 130px;
       --scroll-seconds: 14s;
 
-      /* layout */
       --lane-w: clamp(110px, 16vw, 260px);
       --stage-gap: clamp(6px, 1vw, 12px);
       --frame-pad: clamp(10px, 1.2vw, 16px);
-
-      /* top strip */
-      --top-strip-h: clamp(84px, 10vw, 120px);
     }
 
     *{ box-sizing:border-box; }
-
     html, body { height: 100%; }
 
     body{
@@ -43,16 +35,12 @@
       min-height:100%;
       font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
       color:var(--text);
-
-      /* ✅ IMPORTANT: do NOT hide vertical overflow on mobile */
       overflow-x: hidden;
       overflow-y: auto;
-
       background: #000;
       -webkit-text-size-adjust: 100%;
     }
 
-    /* ✅ Background image covers entire screen */
     body::before{
       content:"";
       position: fixed;
@@ -84,21 +72,14 @@
       overflow:hidden;
     }
 
-    /* ✅ Use svh/dvh-safe viewport sizing.
-       - 100svh is “small viewport height” (stable when address bar changes)
-       - fallback to 100vh automatically if unsupported */
     .wrap{
       position: relative;
       z-index: 2;
-
       min-height: 100svh;
       padding: 18px 12px 24px;
-
       display:flex;
       justify-content:center;
       align-items:flex-start;
-
-      /* ✅ allow scrolling */
       overflow: visible;
     }
 
@@ -152,7 +133,6 @@
       background: rgba(30, 96, 218, 0.92);
     }
 
-    /* FRAME OUTER */
     .frame{
       width: 100%;
       padding: var(--frame-pad);
@@ -169,14 +149,11 @@
       max-width: 1200px;
     }
 
-    /* ✅ TOP DIVISION (3 pictures above the whole stage) */
+    /* ✅ TOP STRIP (responsive; works on any screen size) */
     .top-strip{
       display: grid;
       gap: var(--stage-gap);
       margin-bottom: var(--stage-gap);
-      height: var(--top-strip-h);
-
-      /* auto-fit makes it responsive without special breakpoints */
       grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
     }
 
@@ -186,12 +163,9 @@
       border: 1px solid rgba(255,255,255,0.14);
       background: rgba(0,0,0,0.10);
       box-shadow: 0 10px 24px rgba(0,0,0,0.25);
-
-      /* ✅ consistent “photo card” sizing */
-      aspect-ratio: 16 / 6;       /* wide strip; change to 16/9 if you want taller */
+      aspect-ratio: 16 / 6;
       min-height: 84px;
     }
-
 
     .top-strip img{
       width:100%;
@@ -200,7 +174,6 @@
       display:block;
     }
 
-    /* ✅ STAGE LAYOUT with named areas */
     .stage{
       display:grid;
       grid-template-columns: minmax(92px, var(--lane-w)) minmax(0, 1fr) minmax(92px, var(--lane-w));
@@ -223,8 +196,6 @@
       box-shadow: 0 18px 45px rgba(0,0,0,0.28);
     }
 
-    /* ✅ The center frame should never “vanish” due to max-height.
-       Use svh and let page scroll if needed. */
     .frame-center > img.frame-bg{
       width: 100%;
       height: auto;
@@ -234,7 +205,6 @@
       background: rgba(0,0,0,0.08);
     }
 
-    /* LEFT & RIGHT AUTO SLIDERS */
     .lane{
       pointer-events:none;
       overflow:hidden;
@@ -242,8 +212,6 @@
       background: rgba(0,0,0,0.10);
       border: 1px solid rgba(255,255,255,0.10);
       backdrop-filter: blur(2px);
-
-      /* ✅ default: match center frame height via JS */
       height: var(--frame-h, 320px);
       max-height: 70svh;
     }
@@ -281,7 +249,6 @@
       to   { transform: translateY(calc(-1 * var(--loop))); }
     }
 
-    /* Celebration animations */
     .balloon{
       position:absolute;
       bottom:-120px;
@@ -327,22 +294,19 @@
     .fade-out{ animation: fadeOut 900ms ease forwards; }
     @keyframes fadeOut{ to { opacity:0; } }
 
-    /* ✅ MOBILE REFLOW:
-       Center frame stays big; lanes move BELOW and become 2 columns.
-       This prevents “tiny columns” + vanishing feeling. */
+    /* ✅ MOBILE */
     @media (max-width: 640px){
       :root{
         --tile-h: 110px;
         --scroll-seconds: 18s;
-        --lane-w: 1fr; /* not used in mobile layout */
+        --lane-w: 1fr;
         --stage-gap: 10px;
       }
 
+      /* ✅ Keep ALL 3 top photos visible (no hiding) */
       .top-strip{
-        grid-template-columns: 1fr 1fr;
-        height: clamp(84px, 18vw, 120px);
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
       }
-      .top-strip .strip-tile:nth-child(3){ display:none; }
 
       .stage{
         grid-template-columns: 1fr 1fr;
@@ -351,13 +315,13 @@
           "left  right";
       }
 
-      /* On mobile, lanes should be a reasonable height, not forced to the big frame height */
       .lane{
         height: clamp(180px, 28svh, 280px);
         max-height: none;
       }
+
       .frame-center > img.frame-bg{
-        max-height: 52svh; /* keep it visible above lanes */
+        max-height: 52svh;
       }
     }
 
@@ -436,10 +400,19 @@
 
       initTopStrip();
       await initLanes();
-      syncLaneHeightToFrame(); // desktop only (mobile uses fixed lane height)
+      syncLaneHeightToFrame();
     });
 
-    /* PHOTOS */
+    /* ✅ PHOTOS */
+
+    // ✅ Top strip: exactly these 3 (must exist in /assets/)
+    const topPhotos = [
+      "assets/small1.png",
+      "assets/small2.png",
+      "assets/moon2.jpeg"
+    ];
+
+    // ⚠️ If these filenames are not real, lanes will show broken icons
     const leftPhotos = [
       "assets/couple2birds.jpg",
       "assets/122just.jpg",
@@ -458,37 +431,21 @@
       "assets/moosite.jpeg",
     ];
 
-    function setImg(id, src, fallback){
+    // ✅ No pigeon fallback (so you can see what fails)
+    function setImgOrLog(id, src){
       const el = document.getElementById(id);
+      el.onload  = () => console.log(`[OK] ${id} loaded:`, src);
+      el.onerror = () => console.error(`[FAIL] ${id} missing/not reachable:`, src);
 
-      // show fallback if the real image fails
-      el.onerror = () => {
-        console.error(`[TOP STRIP] Failed to load: ${src}`);
-        el.src = fallback;
-      };
-
-      // also log success so you can confirm
-      el.onload = () => console.log(`[TOP STRIP] Loaded: ${src}`);
-
-      el.src = src;
+      // cache-bust while testing
+      el.src = src + "?v=" + Date.now();
     }
 
     function initTopStrip(){
-      // ✅ Define the 3 top images explicitly (no ambiguity)
-      const topPhotos = [
-        "assets/small2.png",  // pigeons
-        "assets/small1.png",
-        "assets/moon2.jpeg"
-      ];
-
-      // ✅ Use a known-good fallback (pick something you KNOW loads)
-      const fallback = "assets/couplebirds.jpg";
-
-      setImg("strip1", topPhotos[0], fallback);
-      setImg("strip2", topPhotos[1], fallback);
-      setImg("strip3", topPhotos[2], fallback);
+      setImgOrLog("strip1", topPhotos[0]);
+      setImgOrLog("strip2", topPhotos[1]);
+      setImgOrLog("strip3", topPhotos[2]);
     }
-
 
     /* AUTO-SLIDING LANES */
     function buildTrack(trackEl, photos){
@@ -539,7 +496,7 @@
       const mq = window.matchMedia("(max-width: 640px)");
 
       const apply = () => {
-        if (mq.matches) return; // mobile uses fixed lane height from CSS
+        if (mq.matches) return;
         const h = Math.round(img.getBoundingClientRect().height);
         if (h > 0) stage.style.setProperty("--frame-h", h + "px");
       };
