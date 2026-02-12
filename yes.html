@@ -77,6 +77,10 @@
       z-index: 55;
       pointer-events:none;
       overflow:hidden;
+
+      /* ✅ hard clip to avoid edge pixel artifacts */
+      clip-path: inset(0);
+      contain: paint;
     }
 
     .wrap{
@@ -116,7 +120,6 @@
     .hero{
       display:grid;
 
-      /* ✅ Use minmax to prevent columns from becoming “too big” or “too tiny” */
       grid-template-columns:
         minmax(140px, var(--lane-w))
         minmax(260px, 1fr)
@@ -287,7 +290,7 @@
       to   { transform: translateY(calc(-1 * var(--loop))); }
     }
 
-    /* ===== MOBILE / TABLET: keep SAME concept, just tighten sizes ===== */
+    /* ===== MOBILE / TABLET ===== */
     @media (max-width: 900px){
       :root{
         --lane-w: clamp(120px, 22vw, 180px);
@@ -304,10 +307,10 @@
       }
     }
 
-    /* ✅ VERY SMALL PHONES: still consistent, but switch to 2 columns to avoid tiny squished 3-col */
+    /* ✅ VERY SMALL PHONES */
     @media (max-width: 520px){
       :root{
-        --lane-w: 150px;           /* used by stage only */
+        --lane-w: 150px;
         --hero-photo-minh: 190px;
         --hero-photo-maxh: 34vh;
       }
@@ -320,7 +323,6 @@
           "p2     p2";
       }
 
-      /* Keep p1/p3 nice and tall like your sketch */
       .photo-card{
         min-height: 220px;
         max-height: 40vh;
@@ -562,8 +564,9 @@
       setTimeout(() => b.remove(), (dur + 0.2) * 1000);
     }
 
+    /* ✅ FIXED: keep fireworks away from edges + shorter distance */
     function spawnFireworkBurst(){
-      const x = rand(12, 88);
+      const x = rand(22, 78);
       const y = rand(10, 50);
       const particles = Math.floor(rand(16, 26));
 
@@ -575,7 +578,8 @@
         p.style.background = pick(sparkColors);
 
         const angle = rand(0, Math.PI * 2);
-        const dist  = rand(40, 170);
+        const dist  = rand(30, 120);
+
         p.style.setProperty("--dx", (Math.cos(angle) * dist) + "px");
         p.style.setProperty("--dy", (Math.sin(angle) * dist) + "px");
 

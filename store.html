@@ -23,12 +23,12 @@
       --tile-h: 130px;
       --scroll-seconds: 14s;
 
-      /* layout */
-      --lane-w: clamp(170px, 20vw, 340px);     /* wider side columns like your sketch */
+      /* layout (DESKTOP defaults) */
+      --lane-w: clamp(170px, 20vw, 340px);
       --stage-gap: clamp(8px, 1.1vw, 14px);
       --frame-pad: clamp(10px, 1.2vw, 16px);
 
-      /* “sketch” top layout sizing */
+      /* hero (top sketch area) */
       --hero-header-minh: 86px;
       --hero-photo-minh: 220px;
       --hero-photo-maxh: 36vh;
@@ -42,8 +42,8 @@
       min-height:100%;
       font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
       color:var(--text);
-      overflow-x: hidden;
-      overflow-y: auto;
+      overflow-x:hidden;
+      overflow-y:auto;
       background:#000;
       -webkit-text-size-adjust: 100%;
     }
@@ -96,7 +96,6 @@
       gap: 12px;
     }
 
-    /* Outer glass frame around everything */
     .frame{
       width: 100%;
       padding: var(--frame-pad);
@@ -113,22 +112,25 @@
       max-width: 1200px;
     }
 
-    /* ==============================
-       ✅ SKETCH LAYOUT (TOP AREA)
-       3 columns: left photo1 | center header+photo2 | right photo3
-       ============================== */
+    /* ===== HERO (your sketch) ===== */
     .hero{
       display:grid;
-      grid-template-columns: var(--lane-w) minmax(0, 1fr) var(--lane-w);
+
+      /* ✅ Use minmax to prevent columns from becoming “too big” or “too tiny” */
+      grid-template-columns:
+        minmax(140px, var(--lane-w))
+        minmax(260px, 1fr)
+        minmax(140px, var(--lane-w));
+
       grid-template-areas:
         "p1 header p3"
         "p1 p2     p3";
+
       gap: var(--stage-gap);
       align-items: stretch;
       margin-bottom: var(--stage-gap);
     }
 
-    /* tiles */
     .card{
       border-radius: 18px;
       border: 1px solid rgba(255,255,255,0.14);
@@ -142,7 +144,6 @@
     .p2{ grid-area: p2; }
     .p3{ grid-area: p3; }
 
-    /* Header card */
     .content{
       text-align:center;
       padding: 14px 14px 12px;
@@ -187,10 +188,6 @@
       background: rgba(30, 96, 218, 0.92);
     }
 
-    /* Photo card sizing to match your sketch:
-       - Photo1 and Photo3 span header+photo2 height
-       - Photo2 sits under header
-    */
     .photo-card{
       height: 100%;
       min-height: calc(var(--hero-header-minh) + var(--hero-photo-minh) + var(--stage-gap));
@@ -202,22 +199,23 @@
       max-height: var(--hero-photo-maxh);
     }
 
-    /* ✅ “fit perfectly” (no cropping) for top photos 1/2/3 */
+    /* ✅ top photos fit fully (no cropping) */
     .photo-card img,
     .photo2-card img{
       width:100%;
       height:100%;
       display:block;
-      object-fit: contain;           /* show whole image */
-      background: rgba(0,0,0,0.18);  /* letterbox area */
+      object-fit: contain;
+      background: rgba(0,0,0,0.18);
     }
 
-    /* ==============================
-       STAGE (bottom area) like before
-       ============================== */
+    /* ===== STAGE ===== */
     .stage{
       display:grid;
-      grid-template-columns: var(--lane-w) minmax(0, 1fr) var(--lane-w);
+      grid-template-columns:
+        minmax(140px, var(--lane-w))
+        minmax(0, 1fr)
+        minmax(140px, var(--lane-w));
       grid-template-areas: "left frame right";
       gap: var(--stage-gap);
       align-items: stretch;
@@ -246,7 +244,6 @@
       background: rgba(0,0,0,0.08);
     }
 
-    /* sliders */
     .lane{
       pointer-events:none;
       overflow:hidden;
@@ -254,7 +251,6 @@
       background: rgba(0,0,0,0.10);
       border: 1px solid rgba(255,255,255,0.10);
       backdrop-filter: blur(2px);
-
       height: var(--frame-h, 420px);
       max-height: 70svh;
     }
@@ -291,73 +287,50 @@
       to   { transform: translateY(calc(-1 * var(--loop))); }
     }
 
-    /* Celebration animations */
-    .balloon{
-      position:absolute;
-      bottom:-120px;
-      width: 42px;
-      height: 54px;
-      border-radius: 50% 50% 48% 48%;
-      filter: drop-shadow(0 10px 12px rgba(0,0,0,0.35));
-      animation: floatUp linear forwards;
-      opacity: 0.95;
-    }
-    .balloon:after{
-      content:"";
-      position:absolute;
-      left:50%;
-      top: 52px;
-      width: 2px;
-      height: 48px;
-      background: rgba(255,255,255,0.55);
-      transform: translateX(-50%);
-      opacity: 0.55;
-    }
-    @keyframes floatUp{
-      from { transform: translateY(0) translateX(0) rotate(0deg); }
-      to   { transform: translateY(-120vh) translateX(var(--drift)) rotate(var(--rot)); }
-    }
-
-    .spark{
-      position:absolute;
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      opacity: 0;
-      transform: translate(-50%,-50%);
-      animation: sparkPop 900ms ease-out forwards;
-      filter: drop-shadow(0 0 10px rgba(255,255,255,0.25));
-    }
-    @keyframes sparkPop{
-      0%   { opacity:0; transform: translate(-50%,-50%) scale(0.2); }
-      20%  { opacity:1; }
-      100% { opacity:0; transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(1); }
-    }
-
-    .fade-out{ animation: fadeOut 900ms ease forwards; }
-    @keyframes fadeOut{ to { opacity:0; } }
-
-    /* ✅ MOBILE: stack nicely, keep features */
-    @media (max-width: 820px){
+    /* ===== MOBILE / TABLET: keep SAME concept, just tighten sizes ===== */
+    @media (max-width: 900px){
       :root{
-        --lane-w: 1fr;
+        --lane-w: clamp(120px, 22vw, 180px);
+        --hero-header-minh: 78px;
+        --hero-photo-minh: 180px;
+        --hero-photo-maxh: 30vh;
         --tile-h: 110px;
         --scroll-seconds: 18s;
-        --hero-photo-minh: 200px;
-        --hero-photo-maxh: 40vh;
+      }
+
+      .controls button{
+        padding: 9px 12px;
+        font-weight: 800;
+      }
+    }
+
+    /* ✅ VERY SMALL PHONES: still consistent, but switch to 2 columns to avoid tiny squished 3-col */
+    @media (max-width: 520px){
+      :root{
+        --lane-w: 150px;           /* used by stage only */
+        --hero-photo-minh: 190px;
+        --hero-photo-maxh: 34vh;
       }
 
       .hero{
-        grid-template-columns: 1fr;
+        grid-template-columns: 1fr 1fr;
         grid-template-areas:
-          "header"
-          "p1"
-          "p2"
-          "p3";
+          "header header"
+          "p1     p3"
+          "p2     p2";
       }
 
-      .photo-card{ min-height: 220px; max-height: 42vh; }
-      .photo2-card{ min-height: 220px; max-height: 42vh; }
+      /* Keep p1/p3 nice and tall like your sketch */
+      .photo-card{
+        min-height: 220px;
+        max-height: 40vh;
+      }
+
+      .content{
+        padding: 12px 12px 10px;
+      }
+
+      h1{ font-size: 20px; }
 
       .stage{
         grid-template-columns: 1fr 1fr;
@@ -367,7 +340,7 @@
       }
 
       .lane{
-        height: clamp(200px, 30svh, 320px);
+        height: clamp(220px, 30svh, 320px);
         max-height: none;
       }
 
@@ -391,18 +364,12 @@
 
   <div class="wrap">
     <div class="column">
-
       <div class="frame">
         <div class="frame-inner">
 
-          <!-- ✅ SKETCH TOP AREA -->
           <div class="hero" aria-label="Top layout">
-            <!-- Top photo 1 (left, tall) -->
-            <div class="card photo-card p1">
-              <img id="strip1" alt="top photo 1">
-            </div>
+            <div class="card photo-card p1"><img id="strip1" alt="top photo 1"></div>
 
-            <!-- Header (center top) -->
             <div class="header-card">
               <div class="content">
                 <h1>Happy Valentine’s Day! 💘</h1>
@@ -415,18 +382,10 @@
               </div>
             </div>
 
-            <!-- Top photo 2 (center bottom) -->
-            <div class="card photo2-card p2">
-              <img id="strip2" alt="top photo 2">
-            </div>
-
-            <!-- Top photo 3 (right, tall) -->
-            <div class="card photo-card p3">
-              <img id="strip3" alt="top photo 3">
-            </div>
+            <div class="card photo2-card p2"><img id="strip2" alt="top photo 2"></div>
+            <div class="card photo-card p3"><img id="strip3" alt="top photo 3"></div>
           </div>
 
-          <!-- ✅ SAME STAGE FEATURES AS BEFORE -->
           <div class="stage">
             <div class="lane left" aria-hidden="true">
               <div class="lane-track" id="leftTrack"></div>
@@ -443,7 +402,6 @@
 
         </div>
       </div>
-
     </div>
   </div>
 
@@ -470,16 +428,13 @@
       syncLaneHeightToFrame();
     });
 
-    /* ✅ PHOTOS */
-
-    // Top photos (must exist exactly in /assets/)
+    /* PHOTOS */
     const topPhotos = [
-      "assets/small1.png",   // top photo 1
-      "assets/moon2.jpeg",   // top photo 2
-      "assets/small_2.png",   // top photo 3
+      "assets/small1.png",
+      "assets/small2.png",
+      "assets/moon2.jpeg",
     ];
 
-    // Lanes (make sure filenames are correct!)
     const leftPhotos = [
       "assets/couple2birds.jpg",
       "assets/122just.jpg",
@@ -553,14 +508,12 @@
       ]);
     }
 
-    /* Match lane height to center frame height (DESKTOP only) */
+    /* Match lane height to center frame height (desktop + mobile) */
     function syncLaneHeightToFrame(){
       const img = document.getElementById("frameImg");
       const stage = document.querySelector(".stage");
-      const mq = window.matchMedia("(max-width: 820px)");
 
       const apply = () => {
-        if (mq.matches) return; // mobile uses fixed lane height from CSS
         const h = Math.round(img.getBoundingClientRect().height);
         if (h > 0) stage.style.setProperty("--frame-h", h + "px");
       };
@@ -572,7 +525,6 @@
       ro.observe(img);
 
       window.addEventListener("resize", apply, { passive:true });
-      mq.addEventListener?.("change", apply);
     }
 
     /* Celebration */
