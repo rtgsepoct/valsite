@@ -23,18 +23,15 @@
       --tile-h: 130px;
       --scroll-seconds: 14s;
 
-      /* layout */
+      /* layout (DESKTOP defaults) */
       --lane-w: clamp(170px, 20vw, 340px);
       --stage-gap: clamp(8px, 1.1vw, 14px);
       --frame-pad: clamp(10px, 1.2vw, 16px);
 
-      /* sketch top layout */
+      /* hero (top sketch area) */
       --hero-header-minh: 86px;
       --hero-photo-minh: 220px;
       --hero-photo-maxh: 36vh;
-
-      /* scaling base (desktop design width) */
-      --design-w: 1200px;
     }
 
     *{ box-sizing:border-box; }
@@ -45,8 +42,8 @@
       min-height:100%;
       font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
       color:var(--text);
-      overflow-x: hidden;
-      overflow-y: auto;
+      overflow-x:hidden;
+      overflow-y:auto;
       background:#000;
       -webkit-text-size-adjust: 100%;
     }
@@ -92,19 +89,11 @@
       align-items:flex-start;
     }
 
-    /* ✅ This outer box gets a JS-set height so scrolling works after scaling */
-    .scale-outer{
-      width: 100%;
+    .column{
+      width: min(1400px, 100%);
       display:flex;
-      justify-content:center;
-      align-items:flex-start;
-    }
-
-    /* ✅ This is the “desktop design” that gets scaled down on mobile */
-    .scale-inner{
-      width: var(--design-w);
-      transform-origin: top center;
-      will-change: transform;
+      flex-direction:column;
+      gap: 12px;
     }
 
     .frame{
@@ -123,16 +112,20 @@
       max-width: 1200px;
     }
 
-    /* ==============================
-       TOP AREA (exactly like your sketch)
-       3 columns: left photo1 | center header+photo2 | right photo3
-       ============================== */
+    /* ===== HERO (your sketch) ===== */
     .hero{
       display:grid;
-      grid-template-columns: var(--lane-w) minmax(0, 1fr) var(--lane-w);
+
+      /* ✅ Use minmax to prevent columns from becoming “too big” or “too tiny” */
+      grid-template-columns:
+        minmax(140px, var(--lane-w))
+        minmax(260px, 1fr)
+        minmax(140px, var(--lane-w));
+
       grid-template-areas:
         "p1 header p3"
         "p1 p2     p3";
+
       gap: var(--stage-gap);
       align-items: stretch;
       margin-bottom: var(--stage-gap);
@@ -206,7 +199,7 @@
       max-height: var(--hero-photo-maxh);
     }
 
-    /* ✅ fit perfectly (no crop) for top photos 1/2/3 */
+    /* ✅ top photos fit fully (no cropping) */
     .photo-card img,
     .photo2-card img{
       width:100%;
@@ -216,12 +209,13 @@
       background: rgba(0,0,0,0.18);
     }
 
-    /* ==============================
-       STAGE (bottom area)
-       ============================== */
+    /* ===== STAGE ===== */
     .stage{
       display:grid;
-      grid-template-columns: var(--lane-w) minmax(0, 1fr) var(--lane-w);
+      grid-template-columns:
+        minmax(140px, var(--lane-w))
+        minmax(0, 1fr)
+        minmax(140px, var(--lane-w));
       grid-template-areas: "left frame right";
       gap: var(--stage-gap);
       align-items: stretch;
@@ -293,58 +287,65 @@
       to   { transform: translateY(calc(-1 * var(--loop))); }
     }
 
-    /* Celebration animations */
-    .balloon{
-      position:absolute;
-      bottom:-120px;
-      width: 42px;
-      height: 54px;
-      border-radius: 50% 50% 48% 48%;
-      filter: drop-shadow(0 10px 12px rgba(0,0,0,0.35));
-      animation: floatUp linear forwards;
-      opacity: 0.95;
-    }
-    .balloon:after{
-      content:"";
-      position:absolute;
-      left:50%;
-      top: 52px;
-      width: 2px;
-      height: 48px;
-      background: rgba(255,255,255,0.55);
-      transform: translateX(-50%);
-      opacity: 0.55;
-    }
-    @keyframes floatUp{
-      from { transform: translateY(0) translateX(0) rotate(0deg); }
-      to   { transform: translateY(-120vh) translateX(var(--drift)) rotate(var(--rot)); }
-    }
-
-    .spark{
-      position:absolute;
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      opacity: 0;
-      transform: translate(-50%,-50%);
-      animation: sparkPop 900ms ease-out forwards;
-      filter: drop-shadow(0 0 10px rgba(255,255,255,0.25));
-    }
-    @keyframes sparkPop{
-      0%   { opacity:0; transform: translate(-50%,-50%) scale(0.2); }
-      20%  { opacity:1; }
-      100% { opacity:0; transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(1); }
-    }
-
-    .fade-out{ animation: fadeOut 900ms ease forwards; }
-    @keyframes fadeOut{ to { opacity:0; } }
-
-    /* ✅ We keep the SAME layout on mobile (no grid reflow).
-       Only reduce tile height/speed a bit if you want. */
-    @media (max-width: 520px){
+    /* ===== MOBILE / TABLET: keep SAME concept, just tighten sizes ===== */
+    @media (max-width: 900px){
       :root{
+        --lane-w: clamp(120px, 22vw, 180px);
+        --hero-header-minh: 78px;
+        --hero-photo-minh: 180px;
+        --hero-photo-maxh: 30vh;
         --tile-h: 110px;
         --scroll-seconds: 18s;
+      }
+
+      .controls button{
+        padding: 9px 12px;
+        font-weight: 800;
+      }
+    }
+
+    /* ✅ VERY SMALL PHONES: still consistent, but switch to 2 columns to avoid tiny squished 3-col */
+    @media (max-width: 520px){
+      :root{
+        --lane-w: 150px;           /* used by stage only */
+        --hero-photo-minh: 190px;
+        --hero-photo-maxh: 34vh;
+      }
+
+      .hero{
+        grid-template-columns: 1fr 1fr;
+        grid-template-areas:
+          "header header"
+          "p1     p3"
+          "p2     p2";
+      }
+
+      /* Keep p1/p3 nice and tall like your sketch */
+      .photo-card{
+        min-height: 220px;
+        max-height: 40vh;
+      }
+
+      .content{
+        padding: 12px 12px 10px;
+      }
+
+      h1{ font-size: 20px; }
+
+      .stage{
+        grid-template-columns: 1fr 1fr;
+        grid-template-areas:
+          "frame frame"
+          "left  right";
+      }
+
+      .lane{
+        height: clamp(220px, 30svh, 320px);
+        max-height: none;
+      }
+
+      .frame-center > img.frame-bg{
+        max-height: 52svh;
       }
     }
 
@@ -362,58 +363,44 @@
   <audio id="music" src="assets/music/folk_songs_1.mp3" loop></audio>
 
   <div class="wrap">
-    <!-- ✅ scaling container -->
-    <div class="scale-outer" id="scaleOuter">
-      <div class="scale-inner" id="scaleInner">
+    <div class="column">
+      <div class="frame">
+        <div class="frame-inner">
 
-        <div class="frame">
-          <div class="frame-inner">
+          <div class="hero" aria-label="Top layout">
+            <div class="card photo-card p1"><img id="strip1" alt="top photo 1"></div>
 
-            <!-- TOP (sketch) -->
-            <div class="hero" aria-label="Top layout">
-              <div class="card photo-card p1">
-                <img id="strip1" alt="top photo 1">
-              </div>
-
-              <div class="header-card">
-                <div class="content">
-                  <h1>Happy Valentine’s Day! 💘</h1>
-                  <div class="controls">
-                    <button onclick="history.back()" class="back-btn">← Back</button>
-                    <button id="playBtn">Play Music ▶</button>
-                    <button id="pauseBtn">Pause ⏸</button>
-                    <button type="button" id="nextBtn" class="next-btn">Next</button>
-                  </div>
+            <div class="header-card">
+              <div class="content">
+                <h1>Happy Valentine’s Day! 💘</h1>
+                <div class="controls">
+                  <button onclick="history.back()" class="back-btn">← Back</button>
+                  <button id="playBtn">Play Music ▶</button>
+                  <button id="pauseBtn">Pause ⏸</button>
+                  <button type="button" id="nextBtn" class="next-btn">Next</button>
                 </div>
               </div>
-
-              <div class="card photo2-card p2">
-                <img id="strip2" alt="top photo 2">
-              </div>
-
-              <div class="card photo-card p3">
-                <img id="strip3" alt="top photo 3">
-              </div>
             </div>
 
-            <!-- STAGE -->
-            <div class="stage">
-              <div class="lane left" aria-hidden="true">
-                <div class="lane-track" id="leftTrack"></div>
-              </div>
-
-              <div class="frame-center">
-                <img id="frameImg" class="frame-bg" src="assets/Valentine's Day Frame.png" alt="Valentine frame">
-              </div>
-
-              <div class="lane right" aria-hidden="true">
-                <div class="lane-track" id="rightTrack"></div>
-              </div>
-            </div>
-
+            <div class="card photo2-card p2"><img id="strip2" alt="top photo 2"></div>
+            <div class="card photo-card p3"><img id="strip3" alt="top photo 3"></div>
           </div>
-        </div>
 
+          <div class="stage">
+            <div class="lane left" aria-hidden="true">
+              <div class="lane-track" id="leftTrack"></div>
+            </div>
+
+            <div class="frame-center">
+              <img id="frameImg" class="frame-bg" src="assets/Valentine's Day Frame.png" alt="Valentine frame">
+            </div>
+
+            <div class="lane right" aria-hidden="true">
+              <div class="lane-track" id="rightTrack"></div>
+            </div>
+          </div>
+
+        </div>
       </div>
     </div>
   </div>
@@ -432,7 +419,16 @@
     playBtn.addEventListener("click", async () => { try { await music.play(); } catch {} });
     pauseBtn.addEventListener("click", () => music.pause());
 
-    /* ✅ PHOTOS */
+    window.addEventListener("load", async () => {
+      try { await music.play(); } catch (_) {}
+      startCelebration(400000);
+
+      initTopStrip();
+      await initLanes();
+      syncLaneHeightToFrame();
+    });
+
+    /* PHOTOS */
     const topPhotos = [
       "assets/small1.png",
       "assets/small2.png",
@@ -512,7 +508,7 @@
       ]);
     }
 
-    /* Match lane height to center frame height (DESKTOP-style) */
+    /* Match lane height to center frame height (desktop + mobile) */
     function syncLaneHeightToFrame(){
       const img = document.getElementById("frameImg");
       const stage = document.querySelector(".stage");
@@ -530,38 +526,6 @@
 
       window.addEventListener("resize", apply, { passive:true });
     }
-
-    /* ✅ SCALE DOWN ON MOBILE so it looks like desktop */
-    function applyDesktopScale(){
-      const outer = document.getElementById("scaleOuter");
-      const inner = document.getElementById("scaleInner");
-
-      const vw = document.documentElement.clientWidth;
-      const padding = 24; // wrap side padding (12 + 12)
-      const baseW = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--design-w")) || 1200;
-
-      // scale only if viewport is smaller than design width
-      const scale = Math.min(1, (vw - padding) / baseW);
-
-      inner.style.transform = `scale(${scale})`;
-
-      // set outer height so body scroll works (transform doesn't affect document flow)
-      const unscaledH = inner.scrollHeight;
-      outer.style.height = (unscaledH * scale) + "px";
-    }
-
-    window.addEventListener("load", async () => {
-      try { await music.play(); } catch (_) {}
-
-      startCelebration(400000);
-
-      initTopStrip();
-      await initLanes();
-      syncLaneHeightToFrame();
-
-      applyDesktopScale();
-      window.addEventListener("resize", applyDesktopScale, { passive:true });
-    });
 
     /* Celebration */
     const layer = document.getElementById("celebration");
