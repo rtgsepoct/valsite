@@ -21,11 +21,10 @@
       --roadEdge: rgba(255,255,255,.55);
       --roadLane: rgba(255,255,255,.75);
 
-      /* Timeline boxes */
       --boxOffsetY: 86px;
 
-      /* Scene height (scrollable, responsive) */
-      --sceneH: clamp(1200px, 180vh, 2100px);
+      /* scrollable scene */
+      --sceneH: clamp(1400px, 240vh, 2600px);
     }
 
     *{ box-sizing:border-box; }
@@ -39,7 +38,7 @@
       background:#000;
     }
 
-    /* ✅ Background: sky-blue + red love gradient blend (no extra empty cards) */
+    /* ✅ Background: keep sky-blue + love red, but FLIP the IMAGE left-right */
     .page-bg{
       position: fixed;
       inset: 0;
@@ -47,10 +46,18 @@
       background:
         radial-gradient(1100px 520px at 18% 12%, rgba(120,190,255,.55), transparent 60%),
         radial-gradient(1100px 520px at 82% 20%, rgba(255,80,140,.45), transparent 62%),
-        linear-gradient(135deg, rgba(90,170,255,.35), rgba(255,60,120,.22)),
-        url("assets/lastone1.png") no-repeat center / cover;
-      background-blend-mode: screen, screen, overlay, normal;
+        linear-gradient(135deg, rgba(90,170,255,.35), rgba(255,60,120,.22));
       background-color:#000;
+    }
+    .page-bg::before{
+      content:"";
+      position: fixed;
+      inset: 0;
+      z-index: -6;
+      background: url("assets/lastone1.png") no-repeat center / cover;
+      transform: scaleX(-1);           /* ✅ flip left-right */
+      transform-origin: center;
+      will-change: transform;
     }
 
     canvas#stars, canvas#rain{
@@ -103,33 +110,21 @@
       position: relative;
     }
 
-    /* ==========================================================
-       SCENE (everything lives here)
-       ========================================================== */
+    /* ✅ Scene with softer (rounded) corners on left side */
     #scene{
       position: relative;
       width: 100%;
       max-width: 1220px;
       margin: 0 auto;
       min-height: var(--sceneH);
-      padding-top: 18px;
-    }
 
-    /* Small title (replaces empty top/side cards) */
-    .scene-title{
-      position: sticky;
-      top: 10px;
-      z-index: 12;
-      width: min(680px, 94vw);
-      margin: 0 auto 14px;
-      padding: 12px 14px;
-      border-radius: 18px;
-      border: 1px solid rgba(255,255,255,.14);
-      background: rgba(0,0,0,.26);
-      backdrop-filter: blur(10px);
-      box-shadow: 0 20px 50px rgba(0,0,0,.36);
-      font-weight: 900;
-      letter-spacing: .2px;
+      /* soft corners */
+      border-radius: 26px;
+      overflow: clip;
+
+      /* extra gentle left rounding */
+      border-top-left-radius: 34px;
+      border-bottom-left-radius: 34px;
     }
 
     /* ==========================================================
@@ -169,7 +164,7 @@
     }
 
     /* ==========================================================
-       Rope / Road (FULL width, starts left edge, reaches right, then down)
+       Rope / Road (continue to end of page)
        ========================================================== */
     .rope-overlay-wrap{
       position: absolute;
@@ -252,21 +247,22 @@
     }
 
     /* ==========================================================
-       Tree (decorative) - optional
+       Tree: originates from bottom of webpage
        ========================================================== */
     .tree-wrap{
       position: absolute;
       left: 0;
-      top: 260px;
+      bottom: 0;            /* ✅ from bottom */
+      top: auto;
       z-index: 7;
       pointer-events:none;
     }
     .tree-trunk{
       position: absolute;
       left: 10px;
-      top: 0;
+      bottom: 0;
       width: 50px;
-      height: 520px;
+      height: 620px;
       border-radius: 40px;
       background:
         linear-gradient(90deg, rgba(30,18,10,.92), rgba(70,40,22,.92), rgba(25,15,9,.92));
@@ -276,9 +272,9 @@
     .tree-bark{
       position:absolute;
       left: 24px;
-      top: 26px;
+      bottom: 26px;
       width: 64px;
-      height: 470px;
+      height: 540px;
       border-radius: 32px;
       background:
         repeating-linear-gradient(
@@ -292,7 +288,7 @@
     .tree-branch{
       position:absolute;
       left: 52px;
-      top: 88px;
+      bottom: 470px; /* branch near top of trunk */
       width: 360px;
       height: 42px;
       border-radius: 999px;
@@ -316,7 +312,7 @@
     .nail{
       position:absolute;
       left: 394px;
-      top: 92px;
+      bottom: 466px; /* aligns with branch */
       width: 18px;
       height: 18px;
       border-radius: 999px;
@@ -337,7 +333,7 @@
     }
 
     /* ==========================================================
-       Hanger line spans scene
+       Hanger
        ========================================================== */
     .hanger{
       position:absolute;
@@ -522,7 +518,7 @@
       height: 18px;
       object-fit: cover;
       border-radius: 6px;
-      box-shadow: 0 10px 16px rgba(0,0,0,.25);
+      box-shadow: 0 10px 16px rgba(0,0,0,.25));
       background: rgba(255,255,255,.12);
       flex: 0 0 auto;
     }
@@ -575,14 +571,14 @@
     }
 
     /* ==========================================================
-       Music UI (smaller + a bit lower)
+       Music UI + Equalizer next to NEXT button
        ========================================================== */
     .music-ui{
       position: absolute;
       left: 50%;
-      top: 860px;                 /* ✅ lower */
+      top: 860px;
       transform: translateX(-50%);
-      width: clamp(250px, 30vw, 420px);   /* ✅ smaller */
+      width: clamp(250px, 30vw, 420px);
       padding: 12px 12px 10px;
       z-index: 11;
 
@@ -623,11 +619,14 @@
       border-color: rgba(255,255,255,.32);
       background: rgba(255,255,255,.12);
     }
+
     .music-controls{
       display:flex;
+      align-items:center;
       gap: 10px;
       justify-content:center;
     }
+
     .mbtn{
       border: 1px solid rgba(255,255,255,.18);
       background: rgba(0,0,0,.25);
@@ -637,31 +636,51 @@
       cursor:pointer;
       font-weight: 900;
       font-size: 13px;
+      display:inline-flex;
+      align-items:center;
+      gap: 8px;
     }
 
-    /* ==========================================================
-       RESPONSIVE
-       ========================================================== */
-    @media (max-width: 980px){
-      :root{
-        --sceneH: clamp(1400px, 240vh, 2600px);
-        --boxOffsetY: 96px;
-      }
-      .tree-wrap{ display:none; }
+    /* equalizer bars */
+    .eq{
+      display:inline-flex;
+      align-items:flex-end;
+      gap: 3px;
+      height: 16px;
+      margin-left: 2px; /* sits right beside NEXT button */
+      opacity: .9;
+      filter: drop-shadow(0 6px 10px rgba(0,0,0,.35));
+    }
+    .eq span{
+      width: 3px;
+      height: 6px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.9);
+      transform-origin: bottom;
+    }
+    .eq.playing span{
+      animation: eqBounce 720ms ease-in-out infinite;
+    }
+    .eq.playing span:nth-child(2){ animation-delay: 90ms; }
+    .eq.playing span:nth-child(3){ animation-delay: 180ms; }
+    .eq.playing span:nth-child(4){ animation-delay: 270ms; }
 
-      .name-lock{
-        left: 12px;
-        top: 160px;
-      }
-      .name-lock-inner{
-        padding: 14px 14px;
-        min-width: 180px;
-      }
+    @keyframes eqBounce{
+      0%{ transform: scaleY(.45); opacity:.75; }
+      40%{ transform: scaleY(1.35); opacity:1; }
+      70%{ transform: scaleY(.65); opacity:.9; }
+      100%{ transform: scaleY(.45); opacity:.75; }
+    }
+
+    @media (max-width: 980px){
+      :root{ --boxOffsetY: 96px; }
+      .tree-wrap{ display:none; }
+      .name-lock{ left: 12px; top: 160px; }
+      .name-lock-inner{ padding: 14px 14px; min-width: 180px; }
       .name-lock-title{ font-size: 28px; }
       .name-lock-plus{ font-size: 22px; }
-
       .music-ui{
-        top: 980px;              /* ✅ lower on mobile */
+        top: 980px;
         width: min(92vw, 420px);
         max-height: 38vh;
       }
@@ -671,6 +690,7 @@
       canvas#stars, canvas#rain{ display:none; }
       .love-layer{ display:none; }
       .proposal{ animation:none; }
+      .eq.playing span{ animation:none; }
     }
   </style>
 </head>
@@ -682,16 +702,12 @@
   <canvas id="rain" aria-hidden="true"></canvas>
   <div class="love-layer" id="loveLayer" aria-hidden="true"></div>
 
-  <!-- Audio only -->
   <audio id="bgPlayer" preload="auto" autoplay playsinline></audio>
 
   <main class="wrap">
     <div id="scene">
+      <!-- ✅ Removed "Our moments" top division entirely -->
 
-      <!-- ✅ Removed empty top/side cards, replaced with compact title -->
-      <div class="scene-title card">Our moments</div>
-
-      <!-- ✅ Title text -->
       <div class="name-lock" aria-label="Name lock">
         <div class="name-lock-inner">
           <div class="name-lock-title">Tika Ram</div>
@@ -699,18 +715,21 @@
         </div>
       </div>
 
-      <!-- ✅ Music (smaller + lower) -->
       <div class="music-ui card" id="musicUI" aria-label="Music playlist">
         <div class="music-title">Music</div>
         <div class="music-list" id="musicList"></div>
         <div class="music-controls">
           <button class="mbtn" id="prevTrack" type="button">⏮</button>
           <button class="mbtn" id="togglePlay" type="button">⏯</button>
+
+          <!-- Next button + equalizer beside it -->
           <button class="mbtn" id="nextTrack" type="button">⏭</button>
+          <div class="eq" id="eq" aria-hidden="true">
+            <span></span><span></span><span></span><span></span>
+          </div>
         </div>
       </div>
 
-      <!-- Optional tree (kept) -->
       <div class="tree-wrap" aria-hidden="true">
         <div class="tree-trunk"></div>
         <div class="tree-bark"></div>
@@ -718,28 +737,30 @@
         <div class="nail" id="nail"></div>
       </div>
 
-      <!-- Rope / Road: starts left edge, goes right, then down like original -->
       <div class="rope-overlay-wrap" aria-hidden="true">
-        <svg id="ropeOverlay" class="rope-overlay" viewBox="0 0 1000 1200" preserveAspectRatio="none">
+        <!-- ✅ viewBox taller so road can reach end of page -->
+        <svg id="ropeOverlay" class="rope-overlay" viewBox="0 0 1000 1600" preserveAspectRatio="none">
           <path id="ropePathEdge" class="road-edge"
             d="M -80 140 C 140 40, 320 240, 520 140 S 820 40, 1080 140
                C 1020 200, 1020 240, 980 275 S 900 365, 960 455
                S 1020 545, 940 635 S 880 725, 950 815
-               S 1020 905, 880 980 S 700 1040, 600 1120" />
+               S 1020 905, 880 980 S 700 1040, 600 1120
+               S 520 1280, 720 1380 S 980 1460, 820 1540" />
           <path id="ropePathBase" class="road-base"
             d="M -80 140 C 140 40, 320 240, 520 140 S 820 40, 1080 140
                C 1020 200, 1020 240, 980 275 S 900 365, 960 455
                S 1020 545, 940 635 S 880 725, 950 815
-               S 1020 905, 880 980 S 700 1040, 600 1120" />
+               S 1020 905, 880 980 S 700 1040, 600 1120
+               S 520 1280, 720 1380 S 980 1460, 820 1540" />
           <path id="ropePath" class="road-lane"
             d="M -80 140 C 140 40, 320 240, 520 140 S 820 40, 1080 140
                C 1020 200, 1020 240, 980 275 S 900 365, 960 455
                S 1020 545, 940 635 S 880 725, 950 815
-               S 1020 905, 880 980 S 700 1040, 600 1120" />
+               S 1020 905, 880 980 S 700 1040, 600 1120
+               S 520 1280, 720 1380 S 980 1460, 820 1540" />
         </svg>
       </div>
 
-      <!-- Hanger line spans scene -->
       <div class="hanger" id="hanger" aria-hidden="true">
         <svg><line id="hangerLine" x1="0" y1="0" x2="0" y2="0"></line></svg>
       </div>
@@ -857,9 +878,10 @@
 
     setTimeout(moveNoButton, 80);
 
-    /* Playlist */
+    /* Playlist + Equalizer state */
     const player = document.getElementById("bgPlayer");
     const musicListEl = document.getElementById("musicList");
+    const eq = document.getElementById("eq");
 
     const tracks = [
       { name: "Folk Songs Playlist 1", src: "assets/music/folk_songs_1.mp3" },
@@ -882,6 +904,11 @@
         });
         musicListEl.appendChild(div);
       });
+    }
+
+    function setEqPlaying(isPlaying){
+      if (!eq) return;
+      eq.classList.toggle("playing", !!isPlaying);
     }
 
     async function loadAndPlay() {
@@ -913,6 +940,10 @@
     });
 
     player?.addEventListener("ended", nextTrack);
+    player?.addEventListener("play",  () => setEqPlaying(true));
+    player?.addEventListener("pause", () => setEqPlaying(false));
+    player?.addEventListener("waiting", () => setEqPlaying(false));
+
     renderTracks();
     loadAndPlay();
 
@@ -920,7 +951,7 @@
     window.addEventListener("keydown", async () => { await tryPlayAfterGesture(); }, { once: true });
 
     /* ==========================================================
-       Timeline events (placed inside #scene)
+       Timeline events along the road (inside #scene)
        ========================================================== */
     const eventsData = [
       { d: "2019 Sep 12", t: "First Twitter message connection" },
@@ -941,10 +972,11 @@
 
     function clamp(v, a, b){ return Math.max(a, Math.min(b, v)); }
 
+    // viewBox is 1000 x 1600
     function svgToScene(pt, svgRect, sceneRect){
       return {
         x: (svgRect.left - sceneRect.left) + (pt.x / 1000) * svgRect.width,
-        y: (svgRect.top  - sceneRect.top)  + (pt.y / 1200) * svgRect.height
+        y: (svgRect.top  - sceneRect.top)  + (pt.y / 1600) * svgRect.height
       };
     }
 
@@ -954,31 +986,20 @@
       const sceneRect = scene.getBoundingClientRect();
 
       let samples = [];
-      let /*prev*/ p0 = null;
+      let prev = null;
       let pixCum = 0;
 
       for (let L = 0; L <= totalLen; L += stepUserLen){
         const pt = lanePath.getPointAtLength(L);
         const scr = svgToScene(pt, svgRect, sceneRect);
-        if (p0){
-          const dx = scr.x - p0.x;
-          const dy = scr.y - p0.y;
+        if (prev){
+          const dx = scr.x - prev.x;
+          const dy = scr.y - prev.y;
           pixCum += Math.sqrt(dx*dx + dy*dy);
         }
         samples.push({ L, pixCum, x: scr.x, y: scr.y });
-        p0 = scr;
+        prev = scr;
       }
-
-      const endPt = lanePath.getPointAtLength(totalLen);
-      const endScr = svgToScene(endPt, svgRect, sceneRect);
-      if (samples.length && samples[samples.length-1].L < totalLen){
-        const last = samples[samples.length-1];
-        const dx = endScr.x - last.x;
-        const dy = endScr.y - last.y;
-        pixCum += Math.sqrt(dx*dx + dy*dy);
-        samples.push({ L: totalLen, pixCum, x: endScr.x, y: endScr.y });
-      }
-
       return { samples, totalPix: pixCum };
     }
 
@@ -1243,6 +1264,8 @@
     setTimeout(() => {
       layoutRoadEventsEqualDistance();
       startHangerLoop();
+      // set initial EQ state
+      setEqPlaying(!player.paused);
     }, 150);
   </script>
 </body>
