@@ -46,12 +46,14 @@
       background: #000;
     }
 
-    /* Background (always consistent) */
+    /* ✅ Background: FULL image visible (never cut) */
     .page-bg{
       position: fixed;
       inset: 0;
       z-index: -5;
-      background: url("assets/lastone1.png") no-repeat center / cover;
+      background: url("assets/lastone1.png") no-repeat center center;
+      background-size: contain;      /* ✅ full image visible */
+      background-color: #000;        /* ✅ fills empty bars */
     }
 
     canvas#stars, canvas#rain{
@@ -105,7 +107,7 @@
     }
 
     /* ==========================================================
-       SCENE (scroll container content lives here)
+       SCENE (everything inside moves together)
        ========================================================== */
     #scene{
       position: relative;
@@ -124,7 +126,7 @@
       position: absolute;
       left: 22px;
       top: 240px;
-      z-index: 9;
+      z-index: 11;
       pointer-events: none;
     }
     .name-lock-inner{
@@ -154,12 +156,12 @@
     }
 
     /* ==========================================================
-       Timeline cards (sticky instead of fixed)
+       Timeline cards (sticky)
        ========================================================== */
     .rope-top-card{
       position: sticky;
       top: 10px;
-      z-index: 10;
+      z-index: 12;
       height: var(--ropeTopH);
       padding-left: var(--ropeInsetLeft);
       padding-right: 16px;
@@ -178,7 +180,7 @@
     .rope-side-card{
       position: sticky;
       top: calc(var(--ropeTopH) + 22px);
-      z-index: 9;
+      z-index: 11;
       width: var(--ropeSideW);
       height: 520px;
       margin-left: auto;
@@ -186,7 +188,7 @@
     }
 
     /* ==========================================================
-       Rope / Road (inside scene, absolute)
+       Rope / Road (inside scene)
        ========================================================== */
     .rope-overlay-wrap{
       position: absolute;
@@ -269,7 +271,7 @@
     }
 
     /* ==========================================================
-       Tree (decorative) - anchor to scene
+       Tree (decorative)
        ========================================================== */
     .tree-wrap{
       position: absolute;
@@ -614,48 +616,17 @@
       line-height: 1;
     }
 
-    /* Speed UI (fixed ok) */
-    .speed-ui{
-      position: fixed;
-      left: 18px;
-      bottom: 18px;
-      z-index: 40;
-      display:flex;
-      align-items:center;
-      gap: 10px;
-      padding: 10px 12px;
-      border-radius: 14px;
-      background: rgba(0,0,0,.35);
-      border: 1px solid rgba(255,255,255,.16);
-      backdrop-filter: blur(8px);
-      box-shadow: 0 16px 30px rgba(0,0,0,.28);
-    }
-    .speed-ui label{
-      font-weight: 900;
-      font-size: 12.5px;
-      color: rgba(255,255,255,.86);
-      white-space: nowrap;
-    }
-    .speed-ui input[type="range"]{ width: 220px; }
-    .speed-ui .val{
-      width: 54px;
-      text-align:right;
-      font-weight: 900;
-      color: rgba(255,255,255,.92);
-      font-size: 12.5px;
-    }
-
     /* ==========================================================
-       Music UI (flexible frame card)
+       Music UI (inside scene so it moves synchronously)
        ========================================================== */
     .music-ui{
-      position: fixed;
+      position: absolute;         /* ✅ moves with the scene */
       left: 50%;
-      top: 52%;
-      transform: translate(-50%, -50%);
+      top: 520px;
+      transform: translateX(-50%);
       width: clamp(280px, 36vw, 520px);
       padding: 14px 14px 12px;
-      z-index: 50;
+      z-index: 11;
 
       border-radius: 22px;
       border: 1px solid rgba(255,255,255,.16);
@@ -663,7 +634,7 @@
       box-shadow: 0 26px 70px rgba(0,0,0,.44);
       backdrop-filter: blur(12px);
 
-      max-height: min(420px, 56vh);
+      max-height: 360px;
       overflow: auto;
     }
     .music-title{
@@ -708,9 +679,47 @@
       font-weight: 900;
     }
 
+    /* Speed UI stays fixed for convenience (optional to move into scene) */
+    .speed-ui{
+      position: fixed;
+      left: 18px;
+      bottom: 18px;
+      z-index: 40;
+      display:flex;
+      align-items:center;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: 14px;
+      background: rgba(0,0,0,.35);
+      border: 1px solid rgba(255,255,255,.16);
+      backdrop-filter: blur(8px);
+      box-shadow: 0 16px 30px rgba(0,0,0,.28);
+    }
+    .speed-ui label{
+      font-weight: 900;
+      font-size: 12.5px;
+      color: rgba(255,255,255,.86);
+      white-space: nowrap;
+    }
+    .speed-ui input[type="range"]{ width: 220px; }
+    .speed-ui .val{
+      width: 54px;
+      text-align:right;
+      font-weight: 900;
+      color: rgba(255,255,255,.92);
+      font-size: 12.5px;
+    }
+
     /* ==========================================================
-       RESPONSIVE: Mobile
+       RESPONSIVE
        ========================================================== */
+    @media (max-width: 1100px){
+      .music-ui{
+        top: 620px;
+        width: min(92vw, 520px);
+      }
+    }
+
     @media (max-width: 980px){
       :root{
         --ropeSideW: 0px;
@@ -723,10 +732,7 @@
       .tree-wrap{ display:none; }
 
       .music-ui{
-        left: 50%;
-        top: auto;
-        bottom: 86px;
-        transform: translateX(-50%);
+        top: 840px;
         width: min(94vw, 520px);
         max-height: 42vh;
       }
@@ -741,6 +747,13 @@
       }
       .name-lock-title{ font-size: 28px; }
       .name-lock-plus{ font-size: 22px; }
+    }
+
+    @media (max-width: 420px){
+      .music-ui{
+        top: 900px;
+        max-height: 38vh;
+      }
     }
 
     @media (prefers-reduced-motion: reduce){
@@ -758,16 +771,6 @@
   <canvas id="rain" aria-hidden="true"></canvas>
   <div class="love-layer" id="loveLayer" aria-hidden="true"></div>
 
-  <!-- Music -->
-  <div class="music-ui card" id="musicUI" aria-label="Music playlist">
-    <div class="music-title">Music</div>
-    <div class="music-list" id="musicList"></div>
-    <div class="music-controls">
-      <button class="mbtn" id="prevTrack" type="button">⏮</button>
-      <button class="mbtn" id="togglePlay" type="button">⏯</button>
-      <button class="mbtn" id="nextTrack" type="button">⏭</button>
-    </div>
-  </div>
   <audio id="bgPlayer" preload="auto" autoplay playsinline></audio>
 
   <div class="speed-ui" aria-label="Vehicle speed control">
@@ -783,6 +786,17 @@
         <div class="name-lock-inner">
           <div class="name-lock-title">Tika Ram</div>
           <div class="name-lock-plus">+ Geeta</div>
+        </div>
+      </div>
+
+      <!-- ✅ Music moved INSIDE scene -->
+      <div class="music-ui card" id	                 ="musicUI" aria-label="Music playlist">
+        <div class="music-title">Music</div>
+        <div class="music-list" id="musicList"></div>
+        <div class="music-controls">
+          <button class="mbtn" id="prevTrack" type="button">⏮</button>
+          <button class="mbtn" id="togglePlay" type="button">⏯</button>
+          <button class="mbtn" id="nextTrack" type="button">⏭</button>
         </div>
       </div>
 
@@ -844,8 +858,6 @@
           <h1>Valentine’s Day Feb 14, 2026</h1>
           <h2>Will you be my Valentine, Beb? 💘</h2>
 
-          <!-- ✅ HORN BUTTON REMOVED -->
-
           <div class="playground" id="playground">
             <div class="pg-flowers" aria-hidden="true"></div>
             <img class="pg-sticker" src="assets/sticker.png" alt="" aria-hidden="true" />
@@ -894,7 +906,6 @@
       e.stopPropagation();
     });
 
-    // ✅ NO button moves anywhere INSIDE playground, but never overlaps YES
     function moveNoButton() {
       const pad = 10;
       const box = playground.getBoundingClientRect();
@@ -1027,7 +1038,7 @@
     }, { once: true });
 
     /* ==========================================================
-       Timeline events (placed inside #scene)
+       Timeline events inside #scene
        ========================================================== */
     const eventsData = [
       { d: "2019 Sep 12", t: "First Twitter message connection" },
@@ -1185,7 +1196,7 @@
       requestAnimationFrame(tick);
     }
 
-    /* Car animation (start from edge, always visible) */
+    /* Car animation */
     let carAnimId = null;
 
     function unwrapAngle(next, prev){
@@ -1225,7 +1236,7 @@
         const t = Math.min(1, (now - startTime) / duration);
         const ease = t < 0.5 ? (2*t*t) : (1 - Math.pow(-2*t + 2, 2)/2);
 
-        const startPct = 0.0;   // ✅ start at very beginning (screen edge)
+        const startPct = 0.0;
         const endPct = 0.92;
         const len = totalLen * (startPct + (endPct - startPct) * ease);
 
@@ -1246,7 +1257,6 @@
         const w = car.getBoundingClientRect().width || 90;
         const h = car.getBoundingClientRect().height || 54;
 
-        // ✅ force visible on all screens
         const x = clamp(pos.x, w/2, sceneRect.width - w/2);
         const y = clamp(pos.y, h/2, sceneRect.height - h/2);
 
@@ -1271,28 +1281,7 @@
     }
     speedRange.addEventListener("input", (e) => setCarSpeedSeconds(Number(e.target.value)));
 
-    /* Hearts */
-    const layer = document.getElementById("loveLayer");
-    const icons = ["💖","💗","💘","💞","💕","💓"];
-    function spawnLove(){
-      const el = document.createElement("div");
-      el.className = "love";
-      el.textContent = icons[Math.floor(Math.random()*icons.length)];
-      const left = Math.random() * 100;
-      const dur = 4 + Math.random() * 4.5;
-      const drift = (Math.random()*120 - 60) + "px";
-      const scale = (0.7 + Math.random()*0.9).toFixed(2);
-      el.style.left = left + "vw";
-      el.style.setProperty("--x", drift);
-      el.style.setProperty("--s", scale);
-      el.style.animationDuration = dur + "s";
-      layer.appendChild(el);
-      setTimeout(() => el.remove(), (dur + 0.2) * 1000);
-    }
-    setInterval(spawnLove, 420);
-    for(let i=0;i<6;i++) setTimeout(spawnLove, i*180);
-
-    /* Stars + rain */
+    /* Stars/Rain resize */
     const starsCanvas = document.getElementById("stars");
     const sctx = starsCanvas.getContext("2d");
     const rainCanvas = document.getElementById("rain");
