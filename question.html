@@ -7,26 +7,16 @@
 
   <style>
     :root{
-      --ink: rgba(228, 217, 217, 0.92);
+      --ink: rgba(255,255,255,.92);
       --radius: 22px;
       --shadow: 0 26px 70px rgba(0,0,0,.44);
       --border: 1px solid rgba(255,255,255,.14);
 
-      --stackW: min(620px, 92%);
+      --panelGap: 16px;
+      --timelineW: 360px;
 
-      --swingSpeed:4s;
-
-      --roadW: 24px;
-      --roadEdgeW: 2px;
-      --laneDash: 12 12;
-      --roadDark: rgba(10,10,14,.86);
-      --roadEdge: rgba(255,255,255,.55);
-      --roadLane: rgba(255,255,255,.75);
-
-      --carSpeed: 22s;
-
-      /* Boxes */
-      --boxOffsetY: 72px;
+      --stackW: min(620px, 92vw);
+      --swingSpeed: 4s;
     }
 
     *{ box-sizing:border-box; }
@@ -35,34 +25,23 @@
       margin:0;
       font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
       color: var(--ink);
-      overflow-x:hidden;
-      background: #000;
+      overflow-x: hidden;
+      background:#000;
     }
 
-    /* ==========================================================
-       ✅ BACKGROUND: never crops main image (contain) + blurred fill
-       ========================================================== */
+    /* ✅ Background: NO BLUR, NO CROP (contain) */
     .page-bg{
       position: fixed;
       inset: 0;
       z-index: -5;
-      overflow: hidden;
-    }
-    .page-bg::before{
-      content:"";
-      position:absolute;
-      inset:-20px;
-      background: url("assets/lastone1.png") center / cover no-repeat;
-      filter: blur(18px) brightness(.7);
-      transform: scale(1.08);
-    }
-    .page-bg::after{
-      content:"";
-      position:absolute;
-      inset: 0;
-      background: url("assets/lastone1.png") center / contain no-repeat;
+      background-color: #000;
+      background-image: url("assets/lastone1.png");
+      background-repeat: no-repeat;
+      background-position: center;
+      background-size: contain; /* ✅ never cut off */
     }
 
+    /* overlays stay fixed */
     canvas#stars, canvas#rain{
       position:fixed;
       inset:0;
@@ -97,114 +76,90 @@
       100% { transform: translate3d(var(--x,0), -110vh, 0) scale(calc(var(--s,1) + .2)); opacity: 0; }
     }
 
+    /* ✅ Cards: no backdrop blur (to avoid “blurred background” feeling) */
     .card{
       border-radius: var(--radius);
       border: var(--border);
       box-shadow: var(--shadow);
-      backdrop-filter: blur(10px);
-      background: rgba(10,14,28,.42);
+      background: rgba(10,14,28,.44);
       overflow:hidden;
       position: relative;
     }
 
-    /* ==========================================================
-       ✅ DRAWING LAYOUT: two panels (scene + timeline)
-       ========================================================== */
+    /* ✅ Page layout: desktop = 2 columns, mobile = stacked and scrollable */
     .wrap{
-      min-height:100vh;
-      position:relative;
+      min-height: 100vh;
+      position: relative;
       z-index: 3;
       padding: 16px;
-      display:grid;
-      grid-template-columns: 1fr 360px;
-      gap: 16px;
-      align-items: stretch;
+      display: grid;
+      grid-template-columns: 1fr var(--timelineW);
+      gap: var(--panelGap);
+      align-items: start;
     }
 
+    /* Left scene */
     .scene{
       position: relative;
-      border-radius: var(--radius);
-      overflow:hidden;
-      min-height: calc(100vh - 32px);
+      padding: 18px;
     }
 
+    /* Right timeline */
     .timeline{
       position: relative;
-      border-radius: var(--radius);
-      overflow:hidden;
-      min-height: calc(100vh - 32px);
-      padding-top: 0;
-    }
-
-    /* Timeline header inside timeline */
-    .rope-top-card{
-      position: sticky;
-      top: 0;
-      width: 100%;
-      height: auto;
-      border-radius: 0;
-      z-index: 30;
-      padding: 14px 14px 10px;
-      box-shadow: none;
-      background: rgba(10,14,28,.50);
+      padding: 14px;
     }
     .timeline-head{
       display:flex;
+      align-items:center;
       justify-content:space-between;
-      align-items:flex-end;
       gap: 12px;
+      margin-bottom: 12px;
     }
-    .timeline-head h3{ margin:0; font-size: 16px; letter-spacing:.2px; }
+    .timeline-head h3{
+      margin:0;
+      font-size: 16px;
+      letter-spacing: .2px;
+      font-weight: 900;
+    }
 
     /* ==========================================================
-       TREE + BRANCH + NAIL (scene-relative, not fixed)
+       Decorative tree (scene-relative, not fixed) — optional
        ========================================================== */
     .tree-wrap{
       position: absolute;
-      left: 12px;
-      top: 140px;
-      z-index: 6;
+      left: 10px;
+      top: 170px;
+      width: 420px;
+      height: 620px;
+      z-index: 1;
       pointer-events:none;
     }
     .tree-trunk{
       position: absolute;
       left: 0;
-      top: 0;
+      top: 180px;
       width: 50px;
-      height: 520px;
+      height: 440px;
       border-radius: 40px;
       background:
         linear-gradient(90deg, rgba(30,18,10,.92), rgba(70,40,22,.92), rgba(25,15,9,.92));
       box-shadow: 0 25px 60px rgba(0,0,0,.55);
       filter: drop-shadow(0 10px 22px rgba(0,0,0,.35));
-    }
-    .tree-bark{
-      position:absolute;
-      left: 14px;
-      top: 26px;
-      width: 64px;
-      height: 470px;
-      border-radius: 32px;
-      background:
-        repeating-linear-gradient(
-          180deg,
-          rgba(0,0,0,.0) 0 10px,
-          rgba(255,255,255,.05) 10px 14px
-        );
-      opacity:.55;
-      mix-blend-mode: screen;
+      opacity: .9;
     }
     .tree-branch{
       position:absolute;
       left: 42px;
-      top: 88px;
-      width: 360px;
+      top: 260px;
+      width: 340px;
       height: 42px;
       border-radius: 999px;
       background:
         linear-gradient(180deg, rgba(70,40,22,.95), rgba(35,20,12,.95));
       transform: rotate(-4deg);
       box-shadow: 0 18px 40px rgba(0,0,0,.45);
+      opacity: .9;
     }
     .tree-branch::after{
       content:"";
@@ -220,8 +175,8 @@
     }
     .nail{
       position:absolute;
-      left: 384px;
-      top: 92px;
+      left: 372px;
+      top: 265px;
       width: 18px;
       height: 18px;
       border-radius: 999px;
@@ -241,29 +196,13 @@
       opacity:.9;
     }
 
-    /* ==========================================================
-       Proposal + hanger (scene-relative, not fixed)
-       ========================================================== */
-    .proposal-wrap{
-      position: absolute;
-      left: 50%;
-      top: 42%;
-      transform: translate(-50%, -50%);
-      width: var(--stackW);
-      z-index: 6;
-    }
-
+    /* Hanger SVG overlay for rope line (inside scene, not fixed) */
     .hanger{
       position: absolute;
-      left: 50%;
-      top: calc(42% - 140px);
-      transform: translate(-50%, -50%);
-      width: var(--stackW);
-      height: 160px;
-      z-index: 7;
+      inset: 0;
+      z-index: 5;
       pointer-events:none;
     }
-    .hanger svg{ width:100%; height:100%; overflow: visible; }
     .hanger line{
       stroke: rgba(255,255,255,.35);
       stroke-width: 2.2;
@@ -271,15 +210,27 @@
       filter: drop-shadow(0 10px 16px rgba(0,0,0,.35));
     }
 
+    /* ==========================================================
+       Proposal card (in normal flow, centered)
+       ========================================================== */
+    .proposal-wrap{
+      position: relative;
+      z-index: 10;
+      display: flex;
+      justify-content: center;
+      margin-top: 90px;
+    }
+
     .proposal{
+      width: var(--stackW);
       padding: 10px 18px 16px;
       transform-origin: 50% 0%;
       animation: swingFloat var(--swingSpeed) ease-in-out infinite;
     }
     @keyframes swingFloat{
-      0%   { transform: translateY(0px) rotate(-4deg); }
-      50%  { transform: translateY(6px) rotate(6deg); }
-      100% { transform: translateY(0px) rotate(-4deg); }
+      0%   { transform: translateY(0px) rotate(-3deg); }
+      50%  { transform: translateY(6px) rotate(4deg); }
+      100% { transform: translateY(0px) rotate(-3deg); }
     }
 
     .proposal .grommet{
@@ -415,7 +366,7 @@
       font-weight: 1000;
       font-size: 14px;
       box-shadow: 0 18px 26px rgba(0,0,0,.25);
-      transition: transform 120ms ease, filter 120ms ease;
+      transition: transform 120ms ease;
       user-select:none;
       display: inline-flex;
       align-items: center;
@@ -424,15 +375,17 @@
       position:absolute;
     }
     .btn:active{ transform: scale(.98); }
+
     .btn-icon{
       width: 18px;
       height: 18px;
       object-fit: cover;
       border-radius: 6px;
-      box-shadow: 0 10px 16px rgba(0,0,0,.25));
+      box-shadow: 0 10px 16px rgba(0,0,0,.25);
       background: rgba(255,255,255,.12);
       flex: 0 0 auto;
     }
+
     .yes{
       background: linear-gradient(180deg, #3ee37c, #16a34a);
       color:#fff;
@@ -454,7 +407,7 @@
     #noBtn  { z-index: 10; }
 
     .hint{
-      margin-top: 5px;
+      margin-top: 6px;
       text-align:center;
       font-size: 18px;
       font-weight: 1000;
@@ -477,15 +430,13 @@
       color: rgba(255,255,255,.88);
       font-weight: 900;
       cursor:pointer;
-      backdrop-filter: blur(8px);
     }
 
-    /* Horn button (you referenced .horn-btn but didn’t define earlier) */
     .horn-btn{
       display:inline-block;
       margin: 10px auto 0;
       border: 1px solid rgba(255,255,255,.18);
-      background: rgba(0,0,0,.18);
+      background: rgba(0,0,0,.20);
       color: rgba(255,255,255,.92);
       padding: 9px 14px;
       border-radius: 999px;
@@ -496,156 +447,13 @@
     }
 
     /* ==========================================================
-       ✅ Timeline Rope (inside timeline panel)
+       Music UI (in flow, below proposal) — no overlap
        ========================================================== */
-    .rope-overlay-wrap{
-      position: absolute;
-      inset: 48px 0 0 0; /* leave room for sticky header */
-      z-index: 5;
-      pointer-events:none;
-    }
-    .rope-overlay{
-      position:absolute;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      overflow: visible;
-    }
-
-    .road-base{
-      fill:none;
-      stroke: var(--roadDark);
-      stroke-width: var(--roadW);
-      stroke-linecap: round;
-      stroke-linejoin: round;
-      filter: drop-shadow(0 12px 18px rgba(0,0,0,.35));
-      opacity: .95;
-    }
-    .road-edge{
-      fill:none;
-      stroke: var(--roadEdge);
-      stroke-width: calc(var(--roadW) + var(--roadEdgeW));
-      stroke-linecap: round;
-      stroke-linejoin: round;
-      opacity: .45;
-    }
-    .road-lane{
-      fill:none;
-      stroke: var(--roadLane);
-      stroke-width: 3.2;
-      stroke-linecap: round;
-      stroke-dasharray: var(--laneDash);
-      opacity: .85;
-    }
-
-    /* ✅ timeline-local markers (absolute inside .timeline) */
-    .rope-point{
-      position:absolute;
-      width: 12px;
-      height: 12px;
-      border-radius: 999px;
-      background: rgba(247, 4, 4, 0.92);
-      box-shadow: 0 10px 18px rgba(0,0,0,.35);
-      transform: translate(-50%, -50%);
-      z-index: 7;
-      pointer-events:none;
-    }
-
-    .ev-box{
-      position:absolute;
-      width: 220px;
-      max-width: 220px;
-      padding: 10px;
-      border-radius: 14px;
-      border: 1px solid rgba(220, 19, 19, 0.575);
-      backdrop-filter: blur(7px);
-      box-shadow: 0 16px 30px rgba(78, 57, 191, 0.28);
-      z-index: 7;
-      pointer-events:none;
-      background: linear-gradient(135deg, rgba(210, 38, 38, 0.723), rgba(0,0,0,.18));
-      transform: translate(-50%, -50%);
-    }
-    .ev-box .d{
-      font-weight: 900;
-      color: rgba(255,255,255,.95);
-      margin-bottom: 5px;
-      font-size: 12.5px;
-      text-shadow: 0 10px 18px rgba(0,0,0,.35);
-    }
-    .ev-box .t{
-      color: rgba(255,255,255,.88);
-      font-size: 12.5px;
-      line-height: 1.42;
-    }
-
-    /* Car inside timeline panel */
-    .car{
-      position: absolute;
-      left: 0;
-      top: 0;
-      width: 90px;
-      height: 54px;
-      z-index: 8;
-      pointer-events:none;
-      transform-origin: 50% 50%;
-      filter: drop-shadow(0 16px 22px rgba(0,0,0,.45));
-    }
-    .car-emoji{
-      position:absolute;
-      left: 50%;
-      top: 8px;
-      transform: translateX(-50%) scaleX(var(--carFlipX, -1));
-      font-size: 30px;
-      line-height: 1;
-    }
-    .car.honking{ animation: honkShake 180ms ease-in-out 2; }
-    @keyframes honkShake{
-      0%{ transform: rotate(var(--carAngle, 0deg)) translateX(0); }
-      50%{ transform: rotate(var(--carAngle, 0deg)) translateX(2px); }
-      100%{ transform: rotate(var(--carAngle, 0deg)) translateX(0); }
-    }
-
-    /* Speed control (keep fixed) */
-    .speed-ui{
-      position: fixed;
-      left: 18px;
-      bottom: 18px;
-      z-index: 50;
-      display:flex;
-      align-items:center;
-      gap: 10px;
-      padding: 10px 12px;
-      border-radius: 14px;
-      background: rgba(0,0,0,.35);
-      border: 1px solid rgba(255,255,255,.16);
-      backdrop-filter: blur(8px);
-      box-shadow: 0 16px 30px rgba(0,0,0,.28);
-    }
-    .speed-ui label{
-      font-weight: 900;
-      font-size: 12.5px;
-      color: rgba(255,255,255,.86);
-      white-space: nowrap;
-    }
-    .speed-ui input[type="range"]{ width: 220px; }
-    .speed-ui .val{
-      width: 54px;
-      text-align:right;
-      font-weight: 900;
-      color: rgba(255,255,255,.92);
-      font-size: 12.5px;
-    }
-
-    /* ✅ Music UI inside scene (not fixed anymore) */
     .music-ui{
-      position: absolute;
-      left: 50%;
-      bottom: 16px;
-      transform: translateX(-50%);
-      width: min(360px, 92%);
+      width: min(420px, 100%);
+      margin: 18px auto 0;
       padding: 12px 14px;
-      z-index: 25;
-      background: rgba(0,0,0,.28);
+      background: rgba(0,0,0,.24);
     }
     .music-title{
       font-weight: 900;
@@ -686,26 +494,75 @@
     }
 
     /* ==========================================================
-       ✅ Mobile: stack panels, dedicated timeline height
+       Timeline: vertical dotted line + event boxes (NO ROAD, NO CAR)
        ========================================================== */
+    .timeline-list{
+      position: relative;
+      padding-left: 26px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .timeline-list::before{
+      content:"";
+      position:absolute;
+      left: 12px;
+      top: 6px;
+      bottom: 6px;
+      width: 2px;
+      background: rgba(255,255,255,.22);
+      border-radius: 999px;
+    }
+    .ev{
+      position: relative;
+      display: grid;
+      grid-template-columns: 18px 1fr;
+      gap: 10px;
+      align-items: start;
+    }
+    .ev-dot{
+      width: 12px;
+      height: 12px;
+      border-radius: 999px;
+      background: rgba(247, 4, 4, 0.92);
+      box-shadow: 0 10px 18px rgba(0,0,0,.35);
+      margin-top: 14px;
+      transform: translateX(-6px);
+    }
+    .ev-box{
+      padding: 10px;
+      border-radius: 14px;
+      border: 1px solid rgba(220, 19, 19, 0.50);
+      box-shadow: 0 16px 30px rgba(0,0,0,.28);
+      background: linear-gradient(135deg, rgba(210, 38, 38, 0.68), rgba(0,0,0,.18));
+    }
+    .ev-box .d{
+      font-weight: 900;
+      color: rgba(255,255,255,.95);
+      margin-bottom: 5px;
+      font-size: 12.5px;
+      text-shadow: 0 10px 18px rgba(0,0,0,.35);
+    }
+    .ev-box .t{
+      color: rgba(255,255,255,.88);
+      font-size: 12.5px;
+      line-height: 1.42;
+    }
+
+    /* ✅ Mobile: stack & scroll naturally (no fixed elements that overlap) */
     @media (max-width: 980px){
       .wrap{
         grid-template-columns: 1fr;
       }
-      .scene, .timeline{
-        min-height: auto;
-      }
-      .timeline{
-        height: 560px;
-      }
-      .tree-wrap{ display:none; }
+      .tree-wrap{ display:none; } /* optional: saves space on mobile */
+      .proposal-wrap{ margin-top: 14px; }
+      .proposal{ animation: none; } /* optional: reduce motion on small screens */
     }
 
     @media (prefers-reduced-motion: reduce){
       canvas#stars, canvas#rain{ display:none; }
       .love-layer{ display:none; }
       .proposal{ animation:none; }
-      .car.honking{ animation:none; }
     }
   </style>
 </head>
@@ -717,27 +574,21 @@
   <canvas id="rain" aria-hidden="true"></canvas>
   <div class="love-layer" id="loveLayer" aria-hidden="true"></div>
 
-  <!-- Speed (kept fixed) -->
-  <div class="speed-ui" aria-label="Vehicle speed control">
-    <label for="speedRange">Car speed</label>
-    <input id="speedRange" type="range" min="6" max="60" value="22" />
-    <div class="val"><span id="speedVal">22</span>s</div>
-  </div>
-
   <main class="wrap">
 
     <!-- LEFT: SCENE -->
     <section class="scene card" aria-label="Scene">
-
       <div class="tree-wrap" aria-hidden="true">
         <div class="tree-trunk"></div>
-        <div class="tree-bark"></div>
         <div class="tree-branch"></div>
         <div class="nail" id="nail"></div>
       </div>
 
-      <div class="hanger" id="hanger" aria-hidden="true">
-        <svg><line id="hangerLine" x1="0" y1="0" x2="0" y2="0"></line></svg>
+      <!-- hanger svg overlay -->
+      <div class="hanger" aria-hidden="true">
+        <svg id="hangerSvg" width="100%" height="100%">
+          <line id="hangerLine" x1="0" y1="0" x2="0" y2="0"></line>
+        </svg>
       </div>
 
       <div class="proposal-wrap" id="proposalWrap">
@@ -778,7 +629,7 @@
         </section>
       </div>
 
-      <!-- Music inside scene -->
+      <!-- Music (in-flow, no overlap) -->
       <div class="music-ui card" id="musicUI" aria-label="Music playlist">
         <div class="music-title">Music</div>
         <div class="music-list" id="musicList"></div>
@@ -791,36 +642,13 @@
       <audio id="bgPlayer" preload="auto" autoplay playsinline></audio>
     </section>
 
-    <!-- RIGHT: TIMELINE -->
+    <!-- RIGHT: TIMELINE (NO ROAD / NO CAR) -->
     <aside class="timeline card" aria-label="Timeline">
-
-      <section class="rope-top-card" aria-label="Timeline header">
-        <div class="timeline-head">
-          <h3>Our moments</h3>
-        </div>
-      </section>
-
-      <div class="rope-overlay-wrap" aria-hidden="true">
-        <svg id="ropeOverlay" class="rope-overlay" viewBox="0 0 1000 1000" preserveAspectRatio="xMidYMid meet">
-          <path id="ropePathEdge" class="road-edge"
-            d="M -80 140 C 140 40, 320 240, 520 140 S 820 40, 1080 140
-               C 1020 200, 1020 240, 980 275 S 900 365, 960 455
-               S 1020 545, 940 635 S 880 725, 950 815
-               S 1020 905, 880 980 S 700 1040, 600 1120" />
-          <path id="ropePathBase" class="road-base"
-            d="M -80 140 C 140 40, 320 240, 520 140 S 820 40, 1080 140
-               C 1020 200, 1020 240, 980 275 S 900 365, 960 455
-               S 1020 545, 940 635 S 880 725, 950 815
-               S 1020 905, 880 980 S 700 1040, 600 1120" />
-          <path id="ropePath" class="road-lane"
-            d="M -80 140 C 140 40, 320 240, 520 140 S 820 40, 1080 140
-               C 1020 200, 1020 240, 980 275 S 900 365, 960 455
-               S 1020 545, 940 635 S 880 725, 950 815
-               S 1020 905, 880 980 S 700 1040, 600 1120" />
-        </svg>
+      <div class="timeline-head">
+        <h3>Our moments</h3>
       </div>
 
-      <div class="car" id="car" aria-hidden="true"><div class="car-emoji">🚗</div></div>
+      <div class="timeline-list" id="timelineList" aria-label="Moments list"></div>
     </aside>
 
   </main>
@@ -910,7 +738,6 @@
       { name: "Folk Songs Playlist 2", src: "assets/music/folk_songs_2.mp3" },
       { name: "Folk Songs Playlist 3", src: "assets/music/folk_songs_3.mp3" },
     ];
-
     let currentTrack = 0;
 
     function renderTracks() {
@@ -974,17 +801,13 @@
 
     window.addEventListener("pointerdown", async () => {
       await tryPlayAfterGesture();
-      if (typeof hornCtx !== "undefined" && hornCtx?.state === "suspended") await hornCtx.resume();
     }, { once: true });
 
     window.addEventListener("keydown", async () => {
       await tryPlayAfterGesture();
-      if (typeof hornCtx !== "undefined" && hornCtx?.state === "suspended") await hornCtx.resume();
     }, { once: true });
 
-    /* ==========================================================
-       Events: timeline-local layout (NO fixed to body)
-       ========================================================== */
+    /* Timeline (NO road, NO car): render list */
     const eventsData = [
       { d: "2019 Sep 12", t: "First Twitter message connection" },
       { d: "2019 Sep 26", t: "I asked for her Facebook." },
@@ -998,227 +821,24 @@
       { d: "2026 Feb 14", t: "Another beautiful Valentine's Day." }
     ];
 
-    const ropeOverlay = document.getElementById("ropeOverlay");
-    const lanePath = document.getElementById("ropePath");
-    const car = document.getElementById("car");
-    const timelineEl = document.querySelector(".timeline");
-
-    function clamp(v, a, b){ return Math.max(a, Math.min(b, v)); }
-
-    function svgToLocal(pt, svgRect){
-      const tlRect = timelineEl.getBoundingClientRect();
-      return {
-        x: (svgRect.left - tlRect.left) + (pt.x / 1000) * svgRect.width,
-        y: (svgRect.top  - tlRect.top ) + (pt.y / 1000) * svgRect.height
-      };
+    const timelineList = document.getElementById("timelineList");
+    function renderTimeline(){
+      if (!timelineList) return;
+      timelineList.innerHTML = "";
+      eventsData.forEach(ev => {
+        const row = document.createElement("div");
+        row.className = "ev";
+        row.innerHTML = `
+          <div class="ev-dot" aria-hidden="true"></div>
+          <div class="ev-box">
+            <div class="d">${ev.d}</div>
+            <div class="t">${ev.t}</div>
+          </div>
+        `;
+        timelineList.appendChild(row);
+      });
     }
-
-    function buildPixelSamples(stepUserLen = 2){
-      const totalLen = lanePath.getTotalLength();
-      const rect = ropeOverlay.getBoundingClientRect();
-
-      let samples = [];
-      let prev = null;
-      let pixCum = 0;
-
-      for (let L = 0; L <= totalLen; L += stepUserLen){
-        const pt = lanePath.getPointAtLength(L);
-        const scr = svgToLocal(pt, rect);
-
-        if (prev){
-          const dx = scr.x - prev.x;
-          const dy = scr.y - prev.y;
-          pixCum += Math.sqrt(dx*dx + dy*dy);
-        }
-        samples.push({ L, pixCum, x: scr.x, y: scr.y });
-        prev = scr;
-      }
-
-      const endPt = lanePath.getPointAtLength(totalLen);
-      const endScr = svgToLocal(endPt, rect);
-      if (samples.length && samples[samples.length-1].L < totalLen){
-        const last = samples[samples.length-1];
-        const dx = endScr.x - last.x;
-        const dy = endScr.y - last.y;
-        pixCum += Math.sqrt(dx*dx + dy*dy);
-        samples.push({ L: totalLen, pixCum, x: endScr.x, y: endScr.y });
-      }
-
-      return { samples, totalPix: pixCum, totalLen };
-    }
-
-    function lengthAtPixel(samples, targetPix){
-      let lo = 0, hi = samples.length - 1;
-      while (lo < hi){
-        const mid = (lo + hi) >> 1;
-        if (samples[mid].pixCum < targetPix) lo = mid + 1;
-        else hi = mid;
-      }
-      const i = lo;
-      if (i <= 0) return samples[0].L;
-      const a = samples[i-1], b = samples[i];
-      const span = (b.pixCum - a.pixCum) || 1;
-      const t = (targetPix - a.pixCum) / span;
-      return a.L + (b.L - a.L) * t;
-    }
-
-    function layoutRoadEventsEqualDistance(){
-      if (!timelineEl || !ropeOverlay || !lanePath) return;
-
-      timelineEl.querySelectorAll(".rope-point, .ev-box").forEach(n => n.remove());
-
-      const rect = ropeOverlay.getBoundingClientRect();
-      const { samples, totalPix } = buildPixelSamples(2);
-
-      const startOffsetPx = 60;
-      const desiredGapPx = 170;
-      const n = eventsData.length;
-
-      const usable = Math.max(10, totalPix - startOffsetPx - 20);
-      const gap = (n <= 1) ? 0 : Math.min(desiredGapPx, usable / (n - 1));
-
-      const boxOffsetY = Number(getComputedStyle(document.documentElement).getPropertyValue("--boxOffsetY").replace("px","")) || 72;
-
-      const W = timelineEl.clientWidth;
-      const H = timelineEl.clientHeight;
-
-      for (let i = 0; i < n; i++){
-        const targetPix = startOffsetPx + i * gap;
-        const L = lengthAtPixel(samples, clamp(targetPix, 0, totalPix));
-        const pt = lanePath.getPointAtLength(L);
-        const scr = svgToLocal(pt, rect);
-
-        const dot = document.createElement("div");
-        dot.className = "rope-point";
-        dot.style.left = scr.x + "px";
-        dot.style.top  = scr.y + "px";
-        timelineEl.appendChild(dot);
-
-        const box = document.createElement("div");
-        box.className = "ev-box";
-        box.innerHTML = `<div class="d">${eventsData[i].d}</div><div class="t">${eventsData[i].t}</div>`;
-
-        const alt = (i % 2 === 0) ? -boxOffsetY : boxOffsetY;
-        const x = clamp(scr.x, 120, W - 120);
-        const y = clamp(scr.y + alt, 80, H - 80);
-
-        box.style.left = x + "px";
-        box.style.top  = y + "px";
-
-        timelineEl.appendChild(box);
-      }
-    }
-
-    /* Hanger line (scene-local) */
-    const nailEl = document.getElementById("nail");
-    const grommetEl = document.getElementById("grommet");
-    const hangerLine = document.getElementById("hangerLine");
-
-    function layoutHangerLine(){
-      if (!nailEl || !grommetEl || !hangerLine) return;
-
-      const nail = nailEl.getBoundingClientRect();
-      const g = grommetEl.getBoundingClientRect();
-
-      const x1 = nail.left + nail.width/2;
-      const y1 = nail.top + nail.height/2 + 8;
-      const x2 = g.left + g.width/2;
-      const y2 = g.top + g.height/2;
-
-      hangerLine.setAttribute("x1", x1);
-      hangerLine.setAttribute("y1", y1);
-      hangerLine.setAttribute("x2", x2);
-      hangerLine.setAttribute("y2", y2);
-    }
-
-    function startHangerLoop(){
-      const tick = () => {
-        layoutHangerLine();
-        requestAnimationFrame(tick);
-      };
-      requestAnimationFrame(tick);
-    }
-
-    /* Car animation (timeline-local) */
-    let carAnimId = null;
-
-    function unwrapAngle(next, prev){
-      let a = next;
-      while (a - prev > 180) a -= 360;
-      while (a - prev < -180) a += 360;
-      return a;
-    }
-    function uprightAngleAndFlip(rawDeg){
-      let a = ((rawDeg + 180) % 360) - 180;
-      let flipX = -1;
-      if (a > 90){ a -= 180; flipX *= -1; }
-      else if (a < -90){ a += 180; flipX *= -1; }
-      return { angle: a, flipX };
-    }
-
-    function cssNum(name, fallback){
-      const v = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
-      const n = Number(v.replace("px","").replace("s",""));
-      return Number.isFinite(n) ? n : fallback;
-    }
-
-    function animateCar(){
-      if (!timelineEl || !car || !lanePath || !ropeOverlay) return;
-
-      const totalLen = lanePath.getTotalLength();
-      const rect = ropeOverlay.getBoundingClientRect();
-      const seconds = cssNum("--carSpeed", 22);
-      const duration = Math.max(1, seconds) * 1000;
-
-      const startTime = performance.now();
-      let prevRaw = 0;
-
-      function step(now){
-        const t = Math.min(1, (now - startTime) / duration);
-        const ease = t < 0.5 ? (2*t*t) : (1 - Math.pow(-2*t + 2, 2)/2);
-
-        const endPct = 0.92;
-        const len = totalLen * (0.02 + (endPct - 0.02) * ease);
-
-        const p = lanePath.getPointAtLength(len);
-        const p2 = lanePath.getPointAtLength(Math.min(totalLen, len + 3));
-
-        const scr = svgToLocal(p, rect);
-        const x = scr.x;
-        const y = scr.y;
-
-        const raw = Math.atan2(p2.y - p.y, p2.x - p.x) * (180/Math.PI);
-        const rawUnwrapped = unwrapAngle(raw, prevRaw);
-        prevRaw = rawUnwrapped;
-
-        const { angle, flipX } = uprightAngleAndFlip(rawUnwrapped);
-
-        car.style.setProperty("--carAngle", `${angle}deg`);
-
-        const w = car.getBoundingClientRect().width || 90;
-        const h = car.getBoundingClientRect().height || 54;
-
-        car.style.left = (x - w/2) + "px";
-        car.style.top  = (y - h/2) + "px";
-        car.style.transform = `rotate(${angle}deg)`;
-        car.style.setProperty("--carFlipX", String(flipX));
-
-        if (t < 1) carAnimId = requestAnimationFrame(step);
-      }
-
-      if (carAnimId) cancelAnimationFrame(carAnimId);
-      carAnimId = requestAnimationFrame(step);
-    }
-
-    const speedRange = document.getElementById("speedRange");
-    const speedVal = document.getElementById("speedVal");
-
-    function setCarSpeedSeconds(sec){
-      document.documentElement.style.setProperty("--carSpeed", `${sec}s`);
-      speedVal.textContent = String(sec);
-      animateCar();
-    }
-    speedRange.addEventListener("input", (e) => setCarSpeedSeconds(Number(e.target.value)));
+    renderTimeline();
 
     /* Hearts */
     const layer = document.getElementById("loveLayer");
@@ -1320,7 +940,7 @@
     }
     initRain(); drawRain();
 
-    /* Flowers */
+    /* Flowers (proposal + playground) */
     const pgFlowers = playground.querySelector(".pg-flowers");
     const flowerSet = ["🌸","🌺","🌷","🌼","🌻","💐","🪻","🥀"];
     function fillPlaygroundFlowers(count = 34){
@@ -1372,24 +992,48 @@
     }
     hideBrokenImages(".pg-sticker, .btn-icon");
 
-    /* Resize handling */
+    /* ✅ Hanger line: compute inside the scene box */
+    const nailEl = document.getElementById("nail");
+    const grommetEl = document.getElementById("grommet");
+    const hangerLine = document.getElementById("hangerLine");
+    const sceneEl = document.querySelector(".scene");
+
+    function layoutHangerLine(){
+      if (!nailEl || !grommetEl || !hangerLine || !sceneEl) return;
+
+      const sceneRect = sceneEl.getBoundingClientRect();
+      const nail = nailEl.getBoundingClientRect();
+      const g = grommetEl.getBoundingClientRect();
+
+      const x1 = (nail.left + nail.width/2) - sceneRect.left;
+      const y1 = (nail.top + nail.height/2 + 8) - sceneRect.top;
+      const x2 = (g.left + g.width/2) - sceneRect.left;
+      const y2 = (g.top + g.height/2) - sceneRect.top;
+
+      hangerLine.setAttribute("x1", x1);
+      hangerLine.setAttribute("y1", y1);
+      hangerLine.setAttribute("x2", x2);
+      hangerLine.setAttribute("y2", y2);
+    }
+
+    function startHangerLoop(){
+      const tick = () => {
+        layoutHangerLine();
+        requestAnimationFrame(tick);
+      };
+      requestAnimationFrame(tick);
+    }
+    startHangerLoop();
+
+    /* Resize refresh for canvases */
     let resizeTimer = null;
     window.addEventListener("resize", () => {
       clearTimeout(resizeTimer);
       resizeTimer = setTimeout(() => {
         sdpr = resizeCanvas(starsCanvas); initStars();
         rdpr = resizeCanvas(rainCanvas); initRain();
-        layoutRoadEventsEqualDistance();
-        animateCar();
-      }, 60);
+      }, 80);
     });
-
-    /* Init */
-    setTimeout(() => {
-      layoutRoadEventsEqualDistance();
-      animateCar();
-      startHangerLoop();
-    }, 160);
   </script>
 </body>
 </html>
