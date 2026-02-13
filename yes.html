@@ -15,6 +15,7 @@
       --stroke: rgba(255,255,255,0.18);
       --text: #ffffff;
 
+      /* ✅ background image */
       --bg-img: url("assets/moon5.jpeg");
 
       /* sliders */
@@ -48,6 +49,7 @@
       -webkit-text-size-adjust: 100%;
     }
 
+    /* ✅ background image covers entire page */
     body::before{
       content:"";
       position: fixed;
@@ -71,6 +73,7 @@
       pointer-events:none;
     }
 
+    /* ✅ Celebration layer (balloons + fireworks) */
     .celebration{
       position: fixed;
       inset: 0;
@@ -78,7 +81,7 @@
       pointer-events:none;
       overflow:hidden;
 
-      /* ✅ hard clip to avoid edge pixel artifacts */
+      /* ✅ stops the left-edge pixel strip */
       clip-path: inset(0);
       contain: paint;
     }
@@ -119,16 +122,13 @@
     /* ===== HERO (your sketch) ===== */
     .hero{
       display:grid;
-
       grid-template-columns:
         minmax(140px, var(--lane-w))
         minmax(260px, 1fr)
         minmax(140px, var(--lane-w));
-
       grid-template-areas:
         "p1 header p3"
         "p1 p2     p3";
-
       gap: var(--stage-gap);
       align-items: stretch;
       margin-bottom: var(--stage-gap);
@@ -202,7 +202,7 @@
       max-height: var(--hero-photo-maxh);
     }
 
-    /* ✅ top photos fit fully (no cropping) */
+    /* ✅ top photos fit fully */
     .photo-card img,
     .photo2-card img{
       width:100%;
@@ -290,6 +290,52 @@
       to   { transform: translateY(calc(-1 * var(--loop))); }
     }
 
+    /* ===== Balloons + fireworks ===== */
+    .balloon{
+      position:absolute;
+      bottom:-140px;
+      width: 42px;
+      height: 54px;
+      border-radius: 50% 50% 48% 48%;
+      filter: drop-shadow(0 10px 12px rgba(0,0,0,0.35));
+      animation: floatUp linear forwards;
+      opacity: 0.95;
+    }
+    .balloon:after{
+      content:"";
+      position:absolute;
+      left:50%;
+      top: 52px;
+      width: 2px;
+      height: 52px;
+      background: rgba(255,255,255,0.55);
+      transform: translateX(-50%);
+      opacity: 0.55;
+    }
+    @keyframes floatUp{
+      from { transform: translateY(0) translateX(0) rotate(0deg); }
+      to   { transform: translateY(-120vh) translateX(var(--drift)) rotate(var(--rot)); }
+    }
+
+    .spark{
+      position:absolute;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      opacity: 0;
+      transform: translate(-50%,-50%);
+      animation: sparkPop 900ms ease-out forwards;
+      filter: drop-shadow(0 0 10px rgba(255,255,255,0.25));
+    }
+    @keyframes sparkPop{
+      0%   { opacity:0; transform: translate(-50%,-50%) scale(0.2); }
+      20%  { opacity:1; }
+      100% { opacity:0; transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(1); }
+    }
+
+    .fade-out{ animation: fadeOut 900ms ease forwards; }
+    @keyframes fadeOut{ to { opacity:0; } }
+
     /* ===== MOBILE / TABLET ===== */
     @media (max-width: 900px){
       :root{
@@ -300,14 +346,10 @@
         --tile-h: 110px;
         --scroll-seconds: 18s;
       }
-
-      .controls button{
-        padding: 9px 12px;
-        font-weight: 800;
-      }
+      .controls button{ padding: 9px 12px; }
     }
 
-    /* ✅ VERY SMALL PHONES */
+    /* VERY SMALL PHONES */
     @media (max-width: 520px){
       :root{
         --lane-w: 150px;
@@ -323,15 +365,7 @@
           "p2     p2";
       }
 
-      .photo-card{
-        min-height: 220px;
-        max-height: 40vh;
-      }
-
-      .content{
-        padding: 12px 12px 10px;
-      }
-
+      .photo-card{ min-height: 220px; max-height: 40vh; }
       h1{ font-size: 20px; }
 
       .stage{
@@ -423,6 +457,8 @@
 
     window.addEventListener("load", async () => {
       try { await music.play(); } catch (_) {}
+
+      // ✅ balloons + fireworks ON
       startCelebration(400000);
 
       initTopStrip();
@@ -438,11 +474,12 @@
     ];
 
     const leftPhotos = [
-      "assets/leftlane/1.jpeg",
-      "assets/leftlane/2.jpeg",
-      "assets/leftlane/3.jpeg",
-      "assets/leftlane/4.jpeg",
-      "assets/leftlane/5.jpeg",
+      "assets/couple2birds.jpg",
+      "assets/122just.jpg",
+      "assets/larsa.jpg",
+      "assets/lastone1.png",
+      "assets/lovebirds3.jpg",
+      "assets/moosite.jpeg",
     ];
 
     const rightPhotos = [
@@ -451,6 +488,7 @@
       "assets/larsa.jpg",
       "assets/lastone1.png",
       "assets/lovebirds3.jpg",
+      "assets/moosite.jpeg",
     ];
 
     function setImgOrLog(id, src){
@@ -508,7 +546,7 @@
       ]);
     }
 
-    /* Match lane height to center frame height (desktop + mobile) */
+    /* Match lane height to center frame height */
     function syncLaneHeightToFrame(){
       const img = document.getElementById("frameImg");
       const stage = document.querySelector(".stage");
@@ -527,22 +565,28 @@
       window.addEventListener("resize", apply, { passive:true });
     }
 
-    /* Celebration */
+    /* ✅ Celebration: balloons + fireworks */
     const layer = document.getElementById("celebration");
     function rand(min, max){ return Math.random() * (max - min) + min; }
     function pick(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
 
+    /* ✅ many balloon colors: red, pink, yellow, blue, orange, green, purple, white */
     const balloonColors = [
-      "linear-gradient(180deg, rgba(255,82,130,1), rgba(180,35,90,1))",
-      "linear-gradient(180deg, rgba(255,215,90,1), rgba(190,120,10,1))",
-      "linear-gradient(180deg, rgba(120,220,255,1), rgba(20,120,190,1))",
-      "linear-gradient(180deg, rgba(170,255,160,1), rgba(40,160,90,1))",
-      "linear-gradient(180deg, rgba(255,255,255,0.95), rgba(210,210,210,0.95))"
+      "linear-gradient(180deg, rgba(255,59,92,1), rgba(180,20,55,1))",      // red
+      "linear-gradient(180deg, rgba(255,82,130,1), rgba(180,35,90,1))",     // pink
+      "linear-gradient(180deg, rgba(255,215,90,1), rgba(190,120,10,1))",    // yellow
+      "linear-gradient(180deg, rgba(120,220,255,1), rgba(20,120,190,1))",   // blue
+      "linear-gradient(180deg, rgba(255,165,70,1), rgba(190,90,10,1))",     // orange
+      "linear-gradient(180deg, rgba(170,255,160,1), rgba(40,160,90,1))",    // green
+      "linear-gradient(180deg, rgba(190,140,255,1), rgba(90,40,160,1))",    // purple
+      "linear-gradient(180deg, rgba(255,255,255,0.95), rgba(210,210,210,0.95))" // white
     ];
+
     const sparkColors = [
       "rgba(255,105,180,1)",
       "rgba(255,230,120,1)",
       "rgba(140,235,255,1)",
+      "rgba(255,165,70,1)",   // orange spark
       "rgba(180,255,170,1)",
       "rgba(255,255,255,1)"
     ];
@@ -562,9 +606,9 @@
       setTimeout(() => b.remove(), (dur + 0.2) * 1000);
     }
 
-    /* ✅ FIXED: keep fireworks away from edges + shorter distance */
+    /* ✅ FIXED fireworks (no left-edge pixel strip) */
     function spawnFireworkBurst(){
-      const x = rand(22, 78);
+      const x = rand(22, 78);        // keep away from left/right edges
       const y = rand(10, 50);
       const particles = Math.floor(rand(16, 26));
 
@@ -576,7 +620,7 @@
         p.style.background = pick(sparkColors);
 
         const angle = rand(0, Math.PI * 2);
-        const dist  = rand(30, 120);
+        const dist  = rand(30, 120); // smaller distance to avoid clipping
 
         p.style.setProperty("--dx", (Math.cos(angle) * dist) + "px");
         p.style.setProperty("--dy", (Math.sin(angle) * dist) + "px");
