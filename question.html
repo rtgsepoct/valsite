@@ -21,18 +21,11 @@
       --roadEdge: rgba(255,255,255,.55);
       --roadLane: rgba(255,255,255,.75);
 
-      --carSpeed: 22s;
-
       /* Timeline boxes */
       --boxOffsetY: 86px;
 
       /* Scene height (scrollable, responsive) */
       --sceneH: clamp(1200px, 180vh, 2100px);
-
-      /* Right-side space on desktop */
-      --ropeSideW: 240px;
-      --ropeTopH: 170px;
-      --ropeInsetLeft: 12px;
     }
 
     *{ box-sizing:border-box; }
@@ -43,17 +36,21 @@
       color: var(--ink);
       overflow-x:hidden;
       overflow-y:auto;
-      background: #cc3a24;
+      background:#000;
     }
 
-    /* ✅ Background: FULL image visible (never cut) */
+    /* ✅ Background: sky-blue + red love gradient blend (no extra empty cards) */
     .page-bg{
       position: fixed;
       inset: 0;
       z-index: -5;
-      background: url("assets/lastone1.png") no-repeat center center;
-      background-size: contain;      /* ✅ full image visible */
-      background-color: #6789d8;        /* ✅ fills empty bars */
+      background:
+        radial-gradient(1100px 520px at 18% 12%, rgba(120,190,255,.55), transparent 60%),
+        radial-gradient(1100px 520px at 82% 20%, rgba(255,80,140,.45), transparent 62%),
+        linear-gradient(135deg, rgba(90,170,255,.35), rgba(255,60,120,.22)),
+        url("assets/lastone1.png") no-repeat center / cover;
+      background-blend-mode: screen, screen, overlay, normal;
+      background-color:#000;
     }
 
     canvas#stars, canvas#rain{
@@ -107,7 +104,7 @@
     }
 
     /* ==========================================================
-       SCENE (everything inside moves together)
+       SCENE (everything lives here)
        ========================================================== */
     #scene{
       position: relative;
@@ -115,8 +112,24 @@
       max-width: 1220px;
       margin: 0 auto;
       min-height: var(--sceneH);
-      padding-top: calc(var(--ropeTopH) + 18px);
-      padding-right: calc(var(--ropeSideW) + 12px);
+      padding-top: 18px;
+    }
+
+    /* Small title (replaces empty top/side cards) */
+    .scene-title{
+      position: sticky;
+      top: 10px;
+      z-index: 12;
+      width: min(680px, 94vw);
+      margin: 0 auto 14px;
+      padding: 12px 14px;
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.26);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 20px 50px rgba(0,0,0,.36);
+      font-weight: 900;
+      letter-spacing: .2px;
     }
 
     /* ==========================================================
@@ -125,7 +138,7 @@
     .name-lock{
       position: absolute;
       left: 22px;
-      top: 240px;
+      top: 150px;
       z-index: 11;
       pointer-events: none;
     }
@@ -156,39 +169,7 @@
     }
 
     /* ==========================================================
-       Timeline cards (sticky)
-       ========================================================== */
-    .rope-top-card{
-      position: sticky;
-      top: 10px;
-      z-index: 12;
-      height: var(--ropeTopH);
-      padding-left: var(--ropeInsetLeft);
-      padding-right: 16px;
-      display:flex;
-      align-items:flex-start;
-    }
-    .timeline-head{
-      display:flex;
-      align-items:flex-end;
-      gap: 18px;
-      padding: 14px 12px 0 6px;
-      width: 100%;
-    }
-    .timeline-head h3{ margin:0; font-size: 16px; letter-spacing:.2px; }
-
-    .rope-side-card{
-      position: sticky;
-      top: calc(var(--ropeTopH) + 22px);
-      z-index: 11;
-      width: var(--ropeSideW);
-      height: 520px;
-      margin-left: auto;
-      margin-top: 10px;
-    }
-
-    /* ==========================================================
-       Rope / Road (inside scene)
+       Rope / Road (FULL width, starts left edge, reaches right, then down)
        ========================================================== */
     .rope-overlay-wrap{
       position: absolute;
@@ -251,10 +232,10 @@
       border-radius: 14px;
       border: 1px solid rgba(220, 19, 19, 0.575);
       backdrop-filter: blur(7px);
-      box-shadow: 0 16px 30px rgba(78, 57, 191, 0.28);
+      box-shadow: 0 16px 30px rgba(0,0,0,.28);
       z-index: 8;
       pointer-events:none;
-      background: linear-gradient(135deg, rgba(210, 38, 38, 0.723), rgba(0,0,0,.18));
+      background: linear-gradient(135deg, rgba(210, 38, 38, 0.78), rgba(0,0,0,.18));
       transform: translate(-50%, -50%);
     }
     .ev-box .d{
@@ -271,12 +252,12 @@
     }
 
     /* ==========================================================
-       Tree (decorative)
+       Tree (decorative) - optional
        ========================================================== */
     .tree-wrap{
       position: absolute;
       left: 0;
-      top: 380px;
+      top: 260px;
       z-index: 7;
       pointer-events:none;
     }
@@ -373,12 +354,12 @@
     }
 
     /* ==========================================================
-       Proposal (responsive, in-flow)
+       Proposal
        ========================================================== */
     .proposal-wrap{
       position: relative;
       width: var(--stackW);
-      margin: 260px auto 80px;
+      margin: 330px auto 80px;
       z-index: 9;
     }
 
@@ -594,64 +575,42 @@
     }
 
     /* ==========================================================
-       Car (inside scene)
-       ========================================================== */
-    .car{
-      position: absolute;
-      left: 0;
-      top: 0;
-      width: 90px;
-      height: 54px;
-      z-index: 9;
-      pointer-events:none;
-      transform-origin: 50% 50%;
-      filter: drop-shadow(0 16px 22px rgba(0,0,0,.45));
-    }
-    .car-emoji{
-      position:absolute;
-      left: 50%;
-      top: 8px;
-      transform: translateX(-50%) scaleX(var(--carFlipX, -1));
-      font-size: 30px;
-      line-height: 1;
-    }
-
-    /* ==========================================================
-       Music UI (inside scene so it moves synchronously)
+       Music UI (smaller + a bit lower)
        ========================================================== */
     .music-ui{
-      position: absolute;         /* ✅ moves with the scene */
+      position: absolute;
       left: 50%;
-      top: 520px;
+      top: 860px;                 /* ✅ lower */
       transform: translateX(-50%);
-      width: clamp(280px, 36vw, 520px);
-      padding: 14px 14px 12px;
+      width: clamp(250px, 30vw, 420px);   /* ✅ smaller */
+      padding: 12px 12px 10px;
       z-index: 11;
 
-      border-radius: 22px;
+      border-radius: 20px;
       border: 1px solid rgba(255,255,255,.16);
       background: linear-gradient(135deg, rgba(0,0,0,.45), rgba(255,255,255,.06));
-      box-shadow: 0 26px 70px rgba(0,0,0,.44);
+      box-shadow: 0 22px 58px rgba(0,0,0,.40);
       backdrop-filter: blur(12px);
 
-      max-height: 360px;
+      max-height: 280px;
       overflow: auto;
     }
     .music-title{
       font-weight: 900;
-      margin-bottom: 10px;
+      margin-bottom: 8px;
       color: rgba(255,255,255,.94);
       letter-spacing: .2px;
+      font-size: 14px;
     }
     .music-list{
       display:flex;
       flex-direction:column;
-      gap: 8px;
-      margin-bottom: 12px;
+      gap: 7px;
+      margin-bottom: 10px;
     }
     .track{
-      padding: 10px 12px;
-      border-radius: 14px;
+      padding: 9px 10px;
+      border-radius: 12px;
       border: 1px solid rgba(255,255,255,.16);
       background: rgba(255,255,255,.06);
       cursor:pointer;
@@ -673,73 +632,26 @@
       border: 1px solid rgba(255,255,255,.18);
       background: rgba(0,0,0,.25);
       color: rgba(255,255,255,.92);
-      padding: 10px 14px;
+      padding: 9px 12px;
       border-radius: 999px;
       cursor:pointer;
       font-weight: 900;
-    }
-
-    /* Speed UI stays fixed for convenience (optional to move into scene) */
-    .speed-ui{
-      position: fixed;
-      left: 18px;
-      bottom: 18px;
-      z-index: 40;
-      display:flex;
-      align-items:center;
-      gap: 10px;
-      padding: 10px 12px;
-      border-radius: 14px;
-      background: rgba(0,0,0,.35);
-      border: 1px solid rgba(255,255,255,.16);
-      backdrop-filter: blur(8px);
-      box-shadow: 0 16px 30px rgba(0,0,0,.28);
-    }
-    .speed-ui label{
-      font-weight: 900;
-      font-size: 12.5px;
-      color: rgba(255,255,255,.86);
-      white-space: nowrap;
-    }
-    .speed-ui input[type="range"]{ width: 220px; }
-    .speed-ui .val{
-      width: 54px;
-      text-align:right;
-      font-weight: 900;
-      color: rgba(255,255,255,.92);
-      font-size: 12.5px;
+      font-size: 13px;
     }
 
     /* ==========================================================
        RESPONSIVE
        ========================================================== */
-    @media (max-width: 1100px){
-      .music-ui{
-        top: 620px;
-        width: min(92vw, 520px);
-      }
-    }
-
     @media (max-width: 980px){
       :root{
-        --ropeSideW: 0px;
-        --ropeTopH: 220px;
-        --sceneH: clamp(1300px, 220vh, 2400px);
+        --sceneH: clamp(1400px, 240vh, 2600px);
         --boxOffsetY: 96px;
       }
-      #scene{ padding-right: 0; }
-      .rope-side-card{ display:none; }
       .tree-wrap{ display:none; }
-
-      .music-ui{
-        top: 840px;
-        width: min(94vw, 520px);
-        max-height: 42vh;
-      }
 
       .name-lock{
         left: 12px;
-        top: 260px;
+        top: 160px;
       }
       .name-lock-inner{
         padding: 14px 14px;
@@ -747,11 +659,10 @@
       }
       .name-lock-title{ font-size: 28px; }
       .name-lock-plus{ font-size: 22px; }
-    }
 
-    @media (max-width: 420px){
       .music-ui{
-        top: 900px;
+        top: 980px;              /* ✅ lower on mobile */
+        width: min(92vw, 420px);
         max-height: 38vh;
       }
     }
@@ -771,17 +682,16 @@
   <canvas id="rain" aria-hidden="true"></canvas>
   <div class="love-layer" id="loveLayer" aria-hidden="true"></div>
 
+  <!-- Audio only -->
   <audio id="bgPlayer" preload="auto" autoplay playsinline></audio>
-
-  <div class="speed-ui" aria-label="Vehicle speed control">
-    <label for="speedRange">Car speed</label>
-    <input id="speedRange" type="range" min="6" max="60" value="22" />
-    <div class="val"><span id="speedVal">22</span>s</div>
-  </div>
 
   <main class="wrap">
     <div id="scene">
-      <!-- ✅ Added title text -->
+
+      <!-- ✅ Removed empty top/side cards, replaced with compact title -->
+      <div class="scene-title card">Our moments</div>
+
+      <!-- ✅ Title text -->
       <div class="name-lock" aria-label="Name lock">
         <div class="name-lock-inner">
           <div class="name-lock-title">Tika Ram</div>
@@ -789,8 +699,8 @@
         </div>
       </div>
 
-      <!-- ✅ Music moved INSIDE scene -->
-      <div class="music-ui card" id	                 ="musicUI" aria-label="Music playlist">
+      <!-- ✅ Music (smaller + lower) -->
+      <div class="music-ui card" id="musicUI" aria-label="Music playlist">
         <div class="music-title">Music</div>
         <div class="music-list" id="musicList"></div>
         <div class="music-controls">
@@ -800,14 +710,7 @@
         </div>
       </div>
 
-      <section class="card rope-top-card" aria-label="Rope top card">
-        <div class="timeline-head">
-          <h3>Our moments</h3>
-        </div>
-      </section>
-
-      <section class="card rope-side-card" aria-label="Rope side card"></section>
-
+      <!-- Optional tree (kept) -->
       <div class="tree-wrap" aria-hidden="true">
         <div class="tree-trunk"></div>
         <div class="tree-bark"></div>
@@ -815,7 +718,7 @@
         <div class="nail" id="nail"></div>
       </div>
 
-      <!-- Rope / Road -->
+      <!-- Rope / Road: starts left edge, goes right, then down like original -->
       <div class="rope-overlay-wrap" aria-hidden="true">
         <svg id="ropeOverlay" class="rope-overlay" viewBox="0 0 1000 1200" preserveAspectRatio="none">
           <path id="ropePathEdge" class="road-edge"
@@ -836,13 +739,9 @@
         </svg>
       </div>
 
-      <div class="car" id="car" aria-hidden="true"><div class="car-emoji">🚗</div></div>
-
       <!-- Hanger line spans scene -->
       <div class="hanger" id="hanger" aria-hidden="true">
-        <svg>
-          <line id="hangerLine" x1="0" y1="0" x2="0" y2="0"></line>
-        </svg>
+        <svg><line id="hangerLine" x1="0" y1="0" x2="0" y2="0"></line></svg>
       </div>
 
       <div class="proposal-wrap" id="proposalWrap">
@@ -993,29 +892,17 @@
         player.muted = false;
         await player.play();
       } catch {
-        try {
-          player.muted = true;
-          await player.play();
-        } catch {}
+        try { player.muted = true; await player.play(); } catch {}
       }
     }
 
     async function tryPlayAfterGesture() {
       if (!player) return;
-      try {
-        if (player.muted) player.muted = false;
-        await player.play();
-      } catch {}
+      try { if (player.muted) player.muted = false; await player.play(); } catch {}
     }
 
-    function nextTrack() {
-      currentTrack = (currentTrack + 1) % tracks.length;
-      loadAndPlay();
-    }
-    function prevTrack() {
-      currentTrack = (currentTrack - 1 + tracks.length) % tracks.length;
-      loadAndPlay();
-    }
+    function nextTrack() { currentTrack = (currentTrack + 1) % tracks.length; loadAndPlay(); }
+    function prevTrack() { currentTrack = (currentTrack - 1 + tracks.length) % tracks.length; loadAndPlay(); }
 
     document.getElementById("nextTrack")?.addEventListener("click", nextTrack);
     document.getElementById("prevTrack")?.addEventListener("click", prevTrack);
@@ -1029,16 +916,11 @@
     renderTracks();
     loadAndPlay();
 
-    window.addEventListener("pointerdown", async () => {
-      await tryPlayAfterGesture();
-    }, { once: true });
-
-    window.addEventListener("keydown", async () => {
-      await tryPlayAfterGesture();
-    }, { once: true });
+    window.addEventListener("pointerdown", async () => { await tryPlayAfterGesture(); }, { once: true });
+    window.addEventListener("keydown", async () => { await tryPlayAfterGesture(); }, { once: true });
 
     /* ==========================================================
-       Timeline events inside #scene
+       Timeline events (placed inside #scene)
        ========================================================== */
     const eventsData = [
       { d: "2019 Sep 12", t: "First Twitter message connection" },
@@ -1056,7 +938,6 @@
     const scene = document.getElementById("scene");
     const ropeOverlay = document.getElementById("ropeOverlay");
     const lanePath = document.getElementById("ropePath");
-    const car = document.getElementById("car");
 
     function clamp(v, a, b){ return Math.max(a, Math.min(b, v)); }
 
@@ -1073,19 +954,19 @@
       const sceneRect = scene.getBoundingClientRect();
 
       let samples = [];
-      let prev = null;
+      let /*prev*/ p0 = null;
       let pixCum = 0;
 
       for (let L = 0; L <= totalLen; L += stepUserLen){
         const pt = lanePath.getPointAtLength(L);
         const scr = svgToScene(pt, svgRect, sceneRect);
-        if (prev){
-          const dx = scr.x - prev.x;
-          const dy = scr.y - prev.y;
+        if (p0){
+          const dx = scr.x - p0.x;
+          const dy = scr.y - p0.y;
           pixCum += Math.sqrt(dx*dx + dy*dy);
         }
         samples.push({ L, pixCum, x: scr.x, y: scr.y });
-        prev = scr;
+        p0 = scr;
       }
 
       const endPt = lanePath.getPointAtLength(totalLen);
@@ -1098,7 +979,7 @@
         samples.push({ L: totalLen, pixCum, x: endScr.x, y: endScr.y });
       }
 
-      return { samples, totalPix: pixCum, totalLen };
+      return { samples, totalPix: pixCum };
     }
 
     function lengthAtPixel(samples, targetPix){
@@ -1125,8 +1006,8 @@
       const sceneRect = scene.getBoundingClientRect();
       const { samples, totalPix } = buildPixelSamples(2);
 
-      const startOffsetPx = 100;
-      const desiredGapPx = 200;
+      const startOffsetPx = 110;
+      const desiredGapPx = 240;
       const n = eventsData.length;
 
       const usable = Math.max(10, totalPix - startOffsetPx - 20);
@@ -1155,7 +1036,6 @@
         box.innerHTML = `<div class="d">${eventsData[i].d}</div><div class="t">${eventsData[i].t}</div>`;
 
         const alt = (i % 2 === 0) ? -boxOffsetY : boxOffsetY;
-
         const x = clamp(p.x, 120, sceneW - 120);
         const y = clamp(p.y + alt, 110, sceneH - 110);
 
@@ -1196,92 +1076,28 @@
       requestAnimationFrame(tick);
     }
 
-    /* Car animation */
-    let carAnimId = null;
-
-    function unwrapAngle(next, prev){
-      let a = next;
-      while (a - prev > 180) a -= 360;
-      while (a - prev < -180) a += 360;
-      return a;
+    /* Hearts */
+    const layer = document.getElementById("loveLayer");
+    const icons = ["💖","💗","💘","💞","💕","💓"];
+    function spawnLove(){
+      const el = document.createElement("div");
+      el.className = "love";
+      el.textContent = icons[Math.floor(Math.random()*icons.length)];
+      const left = Math.random() * 100;
+      const dur = 4 + Math.random() * 4.5;
+      const drift = (Math.random()*120 - 60) + "px";
+      const scale = (0.7 + Math.random()*0.9).toFixed(2);
+      el.style.left = left + "vw";
+      el.style.setProperty("--x", drift);
+      el.style.setProperty("--s", scale);
+      el.style.animationDuration = dur + "s";
+      layer.appendChild(el);
+      setTimeout(() => el.remove(), (dur + 0.2) * 1000);
     }
-    function uprightAngleAndFlip(rawDeg){
-      let a = ((rawDeg + 180) % 360) - 180;
-      let flipX = -1;
-      if (a > 90){ a -= 180; flipX *= -1; }
-      else if (a < -90){ a += 180; flipX *= -1; }
-      return { angle: a, flipX };
-    }
+    setInterval(spawnLove, 420);
+    for(let i=0;i<6;i++) setTimeout(spawnLove, i*180);
 
-    function cssNum(name, fallback){
-      const v = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
-      const n = Number(v.replace("px","").replace("s",""));
-      return Number.isFinite(n) ? n : fallback;
-    }
-
-    function animateCar(){
-      if (!scene || !car || !lanePath || !ropeOverlay) return;
-
-      const totalLen = lanePath.getTotalLength();
-      const svgRect = ropeOverlay.getBoundingClientRect();
-      const sceneRect = scene.getBoundingClientRect();
-
-      const seconds = cssNum("--carSpeed", 22);
-      const duration = Math.max(1, seconds) * 1000;
-
-      const startTime = performance.now();
-      let prevRaw = 0;
-
-      function step(now){
-        const t = Math.min(1, (now - startTime) / duration);
-        const ease = t < 0.5 ? (2*t*t) : (1 - Math.pow(-2*t + 2, 2)/2);
-
-        const startPct = 0.0;
-        const endPct = 0.92;
-        const len = totalLen * (startPct + (endPct - startPct) * ease);
-
-        const p = lanePath.getPointAtLength(len);
-        const p2 = lanePath.getPointAtLength(Math.min(totalLen, len + 3));
-
-        const pos = svgToScene(p, svgRect, sceneRect);
-
-        const raw = Math.atan2(p2.y - p.y, p2.x - p.x) * (180/Math.PI);
-        const rawUnwrapped = unwrapAngle(raw, prevRaw);
-        prevRaw = rawUnwrapped;
-
-        const { angle, flipX } = uprightAngleAndFlip(rawUnwrapped);
-
-        car.style.setProperty("--carAngle", `${angle}deg`);
-        car.style.setProperty("--carFlipX", String(flipX));
-
-        const w = car.getBoundingClientRect().width || 90;
-        const h = car.getBoundingClientRect().height || 54;
-
-        const x = clamp(pos.x, w/2, sceneRect.width - w/2);
-        const y = clamp(pos.y, h/2, sceneRect.height - h/2);
-
-        car.style.left = (x - w/2) + "px";
-        car.style.top  = (y - h/2) + "px";
-        car.style.transform = `rotate(${angle}deg)`;
-
-        if (t < 1) carAnimId = requestAnimationFrame(step);
-      }
-
-      if (carAnimId) cancelAnimationFrame(carAnimId);
-      carAnimId = requestAnimationFrame(step);
-    }
-
-    const speedRange = document.getElementById("speedRange");
-    const speedVal = document.getElementById("speedVal");
-
-    function setCarSpeedSeconds(sec){
-      document.documentElement.style.setProperty("--carSpeed", `${sec}s`);
-      speedVal.textContent = String(sec);
-      animateCar();
-    }
-    speedRange.addEventListener("input", (e) => setCarSpeedSeconds(Number(e.target.value)));
-
-    /* Stars/Rain resize */
+    /* Stars + rain */
     const starsCanvas = document.getElementById("stars");
     const sctx = starsCanvas.getContext("2d");
     const rainCanvas = document.getElementById("rain");
@@ -1420,14 +1236,12 @@
         sdpr = resizeCanvas(starsCanvas); initStars();
         rdpr = resizeCanvas(rainCanvas); initRain();
         layoutRoadEventsEqualDistance();
-        animateCar();
       }, 70);
     });
 
     /* Init */
     setTimeout(() => {
       layoutRoadEventsEqualDistance();
-      animateCar();
       startHangerLoop();
     }, 150);
   </script>
