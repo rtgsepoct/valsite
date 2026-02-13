@@ -29,19 +29,27 @@
       background:#000;
     }
 
-    /* ✅ Background: NO BLUR, NO CROP (contain) */
+    /* ✅ Background: bigger (zoom) + mobile fills more */
     .page-bg{
       position: fixed;
       inset: 0;
       z-index: -5;
-      background-color: #c71414;
+      background-color: #000;
       background-image: url("assets/lastone1.png");
       background-repeat: no-repeat;
       background-position: center;
-      background-size: contain; /* ✅ never cut off */
+      background-size: 115% auto; /* ✅ increase size on desktop */
+      transform: scale(1.03);      /* tiny extra zoom */
+      transform-origin: center;
+    }
+    @media (max-width: 980px){
+      .page-bg{
+        background-size: cover;      /* ✅ larger on mobile */
+        background-position: center; /* adjust if needed */
+        transform: none;
+      }
     }
 
-    /* overlays stay fixed */
     canvas#stars, canvas#rain{
       position:fixed;
       inset:0;
@@ -53,6 +61,7 @@
     canvas#stars{ opacity:10; mix-blend-mode: screen; }
     canvas#rain{ opacity:10; mix-blend-mode: normal; }
 
+    /* ✅ Floating/Flying love symbols (kept) */
     .love-layer{
       position:fixed;
       inset:0;
@@ -64,19 +73,19 @@
       position:absolute;
       bottom:-50px;
       font-size: 22px;
-      opacity: .85;
+      opacity: .9;
       filter: drop-shadow(0 10px 18px rgba(0,0,0,.35));
       animation: floatUp linear forwards;
       will-change: transform, opacity;
     }
     @keyframes floatUp{
       0%   { transform: translate3d(var(--x,0), 0, 0) scale(var(--s,1)); opacity: 0; }
-      12%  { opacity: .9; }
-      85%  { opacity: .85; }
+      12%  { opacity: .95; }
+      85%  { opacity: .9; }
       100% { transform: translate3d(var(--x,0), -110vh, 0) scale(calc(var(--s,1) + .2)); opacity: 0; }
     }
 
-    /* ✅ Cards: no backdrop blur (to avoid “blurred background” feeling) */
+    /* Card (NO blur) */
     .card{
       border-radius: var(--radius);
       border: var(--border);
@@ -86,7 +95,7 @@
       position: relative;
     }
 
-    /* ✅ Page layout: desktop = 2 columns, mobile = stacked and scrollable */
+    /* ✅ Layout */
     .wrap{
       min-height: 100vh;
       position: relative;
@@ -98,17 +107,33 @@
       align-items: start;
     }
 
-    /* Left scene */
-    .scene{
+    /* ✅ REMOVE “glass blur” from the wide divisions:
+       Make scene + timeline container transparent (no blur, no glass panel). */
+    .scene,
+    .timeline{
+      background: transparent !important;
+      border: none !important;
+      box-shadow: none !important;
+      overflow: visible;
+      border-radius: 0;
+      padding: 0;
+    }
+
+    /* Left scene inner padding wrapper (so content still has spacing) */
+    .scene-inner{
       position: relative;
       padding: 18px;
     }
 
-    /* Right timeline */
-    .timeline{
-      position: relative;
+    /* Right timeline inner card (keep events card only, not the whole wide panel) */
+    .timeline-inner{
       padding: 14px;
+      border-radius: var(--radius);
+      border: var(--border);
+      box-shadow: var(--shadow);
+      background: rgba(10,14,28,.46);
     }
+
     .timeline-head{
       display:flex;
       align-items:center;
@@ -123,80 +148,24 @@
       font-weight: 900;
     }
 
-    /* ==========================================================
-       Decorative tree (scene-relative, not fixed) — optional
-       ========================================================== */
-    .tree-wrap{
-      position: absolute;
-      left: 10px;
-      top: 170px;
-      width: 420px;
-      height: 620px;
-      z-index: 1;
-      pointer-events:none;
+    /* Decorative key/padlock elements are in your background image.
+       You asked: move proposal BELOW the padlock key on desktop. */
+    .proposal-wrap{
+      position: relative;
+      z-index: 10;
+      display: flex;
+      justify-content: center;
+
+      /* ✅ push down more on desktop */
+      margin-top: 250px;
     }
-    .tree-trunk{
-      position: absolute;
-      left: 0;
-      top: 180px;
-      width: 50px;
-      height: 440px;
-      border-radius: 40px;
-      background:
-        linear-gradient(90deg, rgba(30,18,10,.92), rgba(70,40,22,.92), rgba(25,15,9,.92));
-      box-shadow: 0 25px 60px rgba(0,0,0,.55);
-      filter: drop-shadow(0 10px 22px rgba(0,0,0,.35));
-      opacity: .9;
-    }
-    .tree-branch{
-      position:absolute;
-      left: 42px;
-      top: 260px;
-      width: 340px;
-      height: 42px;
-      border-radius: 999px;
-      background:
-        linear-gradient(180deg, rgba(70,40,22,.95), rgba(35,20,12,.95));
-      transform: rotate(-4deg);
-      box-shadow: 0 18px 40px rgba(0,0,0,.45);
-      opacity: .9;
-    }
-    .tree-branch::after{
-      content:"";
-      position:absolute;
-      right: -18px;
-      top: 7px;
-      width: 36px;
-      height: 28px;
-      border-radius: 999px;
-      background: rgba(35,20,12,.95);
-      transform: rotate(10deg);
-      opacity:.9;
-    }
-    .nail{
-      position:absolute;
-      left: 372px;
-      top: 265px;
-      width: 18px;
-      height: 18px;
-      border-radius: 999px;
-      background: radial-gradient(circle at 30% 30%, rgba(255,255,255,.9), rgba(120,120,120,.85) 55%, rgba(40,40,40,.9));
-      box-shadow: 0 12px 22px rgba(0,0,0,.35);
-      transform: rotate(-4deg);
-    }
-    .nail::after{
-      content:"";
-      position:absolute;
-      left: 8px;
-      top: 16px;
-      width: 2px;
-      height: 10px;
-      background: rgba(120,120,120,.85);
-      border-radius: 999px;
-      opacity:.9;
+    @media (max-width: 980px){
+      .proposal-wrap{
+        margin-top: 18px; /* mobile: keep compact */
+      }
     }
 
-    /* Hanger SVG overlay for rope line (inside scene, not fixed) */
+    /* Hanger */
     .hanger{
       position: absolute;
       inset: 0;
@@ -210,17 +179,7 @@
       filter: drop-shadow(0 10px 16px rgba(0,0,0,.35));
     }
 
-    /* ==========================================================
-       Proposal card (in normal flow, centered)
-       ========================================================== */
-    .proposal-wrap{
-      position: relative;
-      z-index: 10;
-      display: flex;
-      justify-content: center;
-      margin-top: 90px;
-    }
-
+    /* Proposal */
     .proposal{
       width: var(--stackW);
       padding: 10px 18px 16px;
@@ -314,6 +273,20 @@
       text-shadow: 0 12px 30px rgba(0,0,0,.35);
       position: relative;
       z-index: 4;
+    }
+
+    .horn-btn{
+      display:inline-block;
+      margin: 10px auto 0;
+      border: 1px solid rgba(255,255,255,.18);
+      background: rgba(0,0,0,.20);
+      color: rgba(255,255,255,.92);
+      padding: 9px 14px;
+      border-radius: 999px;
+      cursor:pointer;
+      position: relative;
+      z-index: 5;
+      font-weight: 900;
     }
 
     .playground{
@@ -432,28 +405,15 @@
       cursor:pointer;
     }
 
-    .horn-btn{
-      display:inline-block;
-      margin: 10px auto 0;
-      border: 1px solid rgba(255,255,255,.18);
-      background: rgba(0,0,0,.20);
-      color: rgba(255,255,255,.92);
-      padding: 9px 14px;
-      border-radius: 999px;
-      cursor:pointer;
-      position: relative;
-      z-index: 5;
-      font-weight: 900;
-    }
-
-    /* ==========================================================
-       Music UI (in flow, below proposal) — no overlap
-       ========================================================== */
+    /* Music UI (in flow, no overlap) */
     .music-ui{
-      width: min(420px, 100%);
+      width: min(520px, 100%);
       margin: 18px auto 0;
       padding: 12px 14px;
       background: rgba(0,0,0,.24);
+      border-radius: var(--radius);
+      border: var(--border);
+      box-shadow: var(--shadow);
     }
     .music-title{
       font-weight: 900;
@@ -493,9 +453,7 @@
       cursor:pointer;
     }
 
-    /* ==========================================================
-       Timeline: vertical dotted line + event boxes (NO ROAD, NO CAR)
-       ========================================================== */
+    /* Timeline list (NO road/car) */
     .timeline-list{
       position: relative;
       padding-left: 26px;
@@ -549,14 +507,9 @@
       line-height: 1.42;
     }
 
-    /* ✅ Mobile: stack & scroll naturally (no fixed elements that overlap) */
+    /* ✅ Mobile stack and scroll */
     @media (max-width: 980px){
-      .wrap{
-        grid-template-columns: 1fr;
-      }
-      .tree-wrap{ display:none; } /* optional: saves space on mobile */
-      .proposal-wrap{ margin-top: 14px; }
-      .proposal{ animation: none; } /* optional: reduce motion on small screens */
+      .wrap{ grid-template-columns: 1fr; }
     }
 
     @media (prefers-reduced-motion: reduce){
@@ -576,79 +529,78 @@
 
   <main class="wrap">
 
-    <!-- LEFT: SCENE -->
-    <section class="scene card" aria-label="Scene">
-      <div class="tree-wrap" aria-hidden="true">
-        <div class="tree-trunk"></div>
-        <div class="tree-branch"></div>
-        <div class="nail" id="nail"></div>
-      </div>
+    <!-- LEFT -->
+    <section class="scene" aria-label="Scene">
+      <div class="scene-inner">
 
-      <!-- hanger svg overlay -->
-      <div class="hanger" aria-hidden="true">
-        <svg id="hangerSvg" width="100%" height="100%">
-          <line id="hangerLine" x1="0" y1="0" x2="0" y2="0"></line>
-        </svg>
-      </div>
-
-      <div class="proposal-wrap" id="proposalWrap">
-        <section class="card proposal" id="proposalCard" aria-label="Valentine Proposal Card">
-          <div class="grommet" id="grommet" aria-hidden="true"></div>
-          <div class="proposal-blooms" aria-hidden="true"></div>
-          <div class="flower-frame"></div>
-          <div class="flower-corner fc-tl">🌸</div>
-          <div class="flower-corner fc-tr">🌺</div>
-          <div class="flower-corner fc-bl">🌷</div>
-          <div class="flower-corner fc-br">💐</div>
-
-          <h1>Valentine’s Day Feb 14, 2026</h1>
-          <h2>Will you be my Valentine, Beb? 💘</h2>
-
-          <button id="hornBtn" class="horn-btn" type="button" aria-label="Horn">📯 Horn</button>
-
-          <div class="playground" id="playground">
-            <div class="pg-flowers" aria-hidden="true"></div>
-            <img class="pg-sticker" src="assets/sticker.png" alt="" aria-hidden="true" />
-
-            <button class="btn yes" id="yesBtn" type="button">
-              <img class="btn-icon" src="assets/yes-mini.png" alt="" aria-hidden="true" />
-              Yes
-            </button>
-
-            <button class="btn no" id="noBtn" type="button" aria-label="No">
-              <img class="btn-icon" src="assets/no-mini.png" alt="" aria-hidden="true" />
-              No
-            </button>
-          </div>
-
-          <div class="hint"><strong>Hint: try to click No 😈</strong></div>
-
-          <div class="back-inside">
-            <button id="backBtn" class="back-btn" type="button">← Back</button>
-          </div>
-        </section>
-      </div>
-
-      <!-- Music (in-flow, no overlap) -->
-      <div class="music-ui card" id="musicUI" aria-label="Music playlist">
-        <div class="music-title">Music</div>
-        <div class="music-list" id="musicList"></div>
-        <div class="music-controls">
-          <button class="mbtn" id="prevTrack" type="button">⏮</button>
-          <button class="mbtn" id="togglePlay" type="button">⏯</button>
-          <button class="mbtn" id="nextTrack" type="button">⏭</button>
+        <!-- hanger svg overlay (optional; if you want no line, remove this block) -->
+        <div class="hanger" aria-hidden="true">
+          <svg id="hangerSvg" width="100%" height="100%">
+            <line id="hangerLine" x1="0" y1="0" x2="0" y2="0"></line>
+          </svg>
         </div>
+
+        <div class="proposal-wrap" id="proposalWrap">
+          <section class="card proposal" id="proposalCard" aria-label="Valentine Proposal Card">
+            <div class="grommet" id="grommet" aria-hidden="true"></div>
+            <div class="proposal-blooms" aria-hidden="true"></div>
+            <div class="flower-frame"></div>
+            <div class="flower-corner fc-tl">🌸</div>
+            <div class="flower-corner fc-tr">🌺</div>
+            <div class="flower-corner fc-bl">🌷</div>
+            <div class="flower-corner fc-br">💐</div>
+
+            <h1>Valentine’s Day Feb 14, 2026</h1>
+            <h2>Will you be my Valentine, Beb? 💘</h2>
+
+            <button id="hornBtn" class="horn-btn" type="button" aria-label="Horn">📯 Horn</button>
+
+            <div class="playground" id="playground">
+              <div class="pg-flowers" aria-hidden="true"></div>
+              <img class="pg-sticker" src="assets/sticker.png" alt="" aria-hidden="true" />
+
+              <button class="btn yes" id="yesBtn" type="button">
+                <img class="btn-icon" src="assets/yes-mini.png" alt="" aria-hidden="true" />
+                Yes
+              </button>
+
+              <button class="btn no" id="noBtn" type="button" aria-label="No">
+                <img class="btn-icon" src="assets/no-mini.png" alt="" aria-hidden="true" />
+                No
+              </button>
+            </div>
+
+            <div class="hint"><strong>Hint: try to click No 😈</strong></div>
+
+            <div class="back-inside">
+              <button id="backBtn" class="back-btn" type="button">← Back</button>
+            </div>
+          </section>
+        </div>
+
+        <!-- Music (in-flow) -->
+        <div class="music-ui" id="musicUI" aria-label="Music playlist">
+          <div class="music-title">Music</div>
+          <div class="music-list" id="musicList"></div>
+          <div class="music-controls">
+            <button class="mbtn" id="prevTrack" type="button">⏮</button>
+            <button class="mbtn" id="togglePlay" type="button">⏯</button>
+            <button class="mbtn" id="nextTrack" type="button">⏭</button>
+          </div>
+        </div>
+        <audio id="bgPlayer" preload="auto" autoplay playsinline></audio>
+
       </div>
-      <audio id="bgPlayer" preload="auto" autoplay playsinline></audio>
     </section>
 
-    <!-- RIGHT: TIMELINE (NO ROAD / NO CAR) -->
-    <aside class="timeline card" aria-label="Timeline">
-      <div class="timeline-head">
-        <h3>Our moments</h3>
+    <!-- RIGHT -->
+    <aside class="timeline" aria-label="Timeline">
+      <div class="timeline-inner">
+        <div class="timeline-head">
+          <h3>Our moments</h3>
+        </div>
+        <div class="timeline-list" id="timelineList" aria-label="Moments list"></div>
       </div>
-
-      <div class="timeline-list" id="timelineList" aria-label="Moments list"></div>
     </aside>
 
   </main>
@@ -799,15 +751,10 @@
     renderTracks();
     loadAndPlay();
 
-    window.addEventListener("pointerdown", async () => {
-      await tryPlayAfterGesture();
-    }, { once: true });
+    window.addEventListener("pointerdown", async () => { await tryPlayAfterGesture(); }, { once: true });
+    window.addEventListener("keydown", async () => { await tryPlayAfterGesture(); }, { once: true });
 
-    window.addEventListener("keydown", async () => {
-      await tryPlayAfterGesture();
-    }, { once: true });
-
-    /* Timeline (NO road, NO car): render list */
+    /* Timeline render */
     const eventsData = [
       { d: "2019 Sep 12", t: "First Twitter message connection" },
       { d: "2019 Sep 26", t: "I asked for her Facebook." },
@@ -840,7 +787,7 @@
     }
     renderTimeline();
 
-    /* Hearts */
+    /* ✅ Floating hearts */
     const layer = document.getElementById("loveLayer");
     const icons = ["💖","💗","💘","💞","💕","💓"];
     function spawnLove(){
@@ -849,8 +796,8 @@
       el.textContent = icons[Math.floor(Math.random()*icons.length)];
       const left = Math.random() * 100;
       const dur = 4 + Math.random() * 4.5;
-      const drift = (Math.random()*120 - 60) + "px";
-      const scale = (0.7 + Math.random()*0.9).toFixed(2);
+      const drift = (Math.random()*140 - 70) + "px";
+      const scale = (0.75 + Math.random()*1.0).toFixed(2);
       el.style.left = left + "vw";
       el.style.setProperty("--x", drift);
       el.style.setProperty("--s", scale);
@@ -858,8 +805,8 @@
       layer.appendChild(el);
       setTimeout(() => el.remove(), (dur + 0.2) * 1000);
     }
-    setInterval(spawnLove, 420);
-    for(let i=0;i<6;i++) setTimeout(spawnLove, i*180);
+    setInterval(spawnLove, 360);
+    for(let i=0;i<10;i++) setTimeout(spawnLove, i*160);
 
     /* Stars + rain */
     const starsCanvas = document.getElementById("stars");
@@ -940,7 +887,7 @@
     }
     initRain(); drawRain();
 
-    /* Flowers (proposal + playground) */
+    /* Flowers */
     const pgFlowers = playground.querySelector(".pg-flowers");
     const flowerSet = ["🌸","🌺","🌷","🌼","🌻","💐","🪻","🥀"];
     function fillPlaygroundFlowers(count = 34){
@@ -992,40 +939,7 @@
     }
     hideBrokenImages(".pg-sticker, .btn-icon");
 
-    /* ✅ Hanger line: compute inside the scene box */
-    const nailEl = document.getElementById("nail");
-    const grommetEl = document.getElementById("grommet");
-    const hangerLine = document.getElementById("hangerLine");
-    const sceneEl = document.querySelector(".scene");
-
-    function layoutHangerLine(){
-      if (!nailEl || !grommetEl || !hangerLine || !sceneEl) return;
-
-      const sceneRect = sceneEl.getBoundingClientRect();
-      const nail = nailEl.getBoundingClientRect();
-      const g = grommetEl.getBoundingClientRect();
-
-      const x1 = (nail.left + nail.width/2) - sceneRect.left;
-      const y1 = (nail.top + nail.height/2 + 8) - sceneRect.top;
-      const x2 = (g.left + g.width/2) - sceneRect.left;
-      const y2 = (g.top + g.height/2) - sceneRect.top;
-
-      hangerLine.setAttribute("x1", x1);
-      hangerLine.setAttribute("y1", y1);
-      hangerLine.setAttribute("x2", x2);
-      hangerLine.setAttribute("y2", y2);
-    }
-
-    function startHangerLoop(){
-      const tick = () => {
-        layoutHangerLine();
-        requestAnimationFrame(tick);
-      };
-      requestAnimationFrame(tick);
-    }
-    startHangerLoop();
-
-    /* Resize refresh for canvases */
+    /* Resize refresh */
     let resizeTimer = null;
     window.addEventListener("resize", () => {
       clearTimeout(resizeTimer);
