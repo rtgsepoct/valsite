@@ -1,616 +1,384 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=yes, maximum-scale=5" />
-  <title>Yay! 💖</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>💙 Timi</title>
 
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --glass: rgba(255,255,255,0.14);
+  --stroke: rgba(255,255,255,0.24);
+  --text: #ffffff;
 
-  <style>
-    :root{
-      --glass: rgba(255,255,255,0.12);
-      --stroke: rgba(255,255,255,0.18);
-      --text: #ffffff;
+  --card-max: 1320px;     /* bigger middle division */
+  --card-pad: 22px;
 
-      --bg-img: url("assets/moon5.jpeg");
+  --tile-radius: 16px;
+  --tile-border: rgba(255,255,255,0.18);
+}
 
-      /* sliders */
-      --lane-gap: 10px;
-      --tile-radius: 12px;
-      --tile-h: 130px;
-      --scroll-seconds: 14s;
+*{ box-sizing:border-box; }
 
-      /* layout (DESKTOP defaults) */
-      --lane-w: clamp(170px, 20vw, 340px);
-      --stage-gap: clamp(8px, 1.1vw, 14px);
-      --frame-pad: clamp(10px, 1.2vw, 16px);
+body{
+  margin:0;
+  min-height:100vh;
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial;
+  color:var(--text);
+  overflow:hidden;
+}
 
-      /* hero (top sketch area) */
-      --hero-header-minh: 86px;
-      --hero-photo-minh: 220px;
-      --hero-photo-maxh: 36vh;
-    }
+/* ===== BACKGROUND IMAGE CYCLE ===== */
+.bg{
+  position:fixed;
+  inset:0;
+  z-index:-5;
+  animation: zoomSlow 40s linear infinite;
+}
+.bg img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  position:absolute;
+  inset:0;
+  opacity:0;
+  animation: bgFade 40s infinite;
+}
+.bg img:nth-child(1){ animation-delay:0s; }
+.bg img:nth-child(2){ animation-delay:10s; }
+.bg img:nth-child(3){ animation-delay:20s; }
+.bg img:nth-child(4){ animation-delay:30s; }
 
-    *{ box-sizing:border-box; }
-    html, body { height: 100%; }
+@keyframes bgFade{
+  0%{opacity:0}
+  5%{opacity:1}
+  25%{opacity:1}
+  30%{opacity:0}
+  100%{opacity:0}
+}
+@keyframes zoomSlow{
+  from{ transform:scale(1); }
+  to{ transform:scale(1.08); }
+}
 
-    body{
-      margin:0;
-      min-height:100%;
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-      color:var(--text);
-      overflow-x:hidden;
-      overflow-y:auto;
-      background:#000;
-      -webkit-text-size-adjust: 100%;
-    }
+/* Stars overlay */
+.stars{
+  position:fixed;
+  inset:0;
+  background: url("./assets/the-moon-is-an-astronomical-body-that-orbits-planet-earth-photo.jpg") repeat;
+  opacity:0.20;
+  animation: drift 120s linear infinite;
+  z-index:-4;
+  pointer-events:none;
+}
+@keyframes drift{
+  from{ background-position:0 0; }
+  to{ background-position:2000px 1000px; }
+}
 
-    body::before{
-      content:"";
-      position: fixed;
-      inset: 0;
-      background:
-        linear-gradient(180deg, rgba(0,0,0,0.35), rgba(0,0,0,0.62)),
-        var(--bg-img) center / cover no-repeat;
-      z-index: 0;
-      pointer-events:none;
-      transform: scale(1.02);
-    }
+/* ===== WATER RIPPLE OVERLAY (CSS) =====
+   Two animated radial gradients drifting = ripple feeling.
+*/
+.ripples{
+  position:fixed;
+  inset:-20%;
+  z-index:-3;
+  pointer-events:none;
+  opacity:0.55;
+  filter: blur(0.2px);
+  background:
+    radial-gradient(circle at 20% 30%, rgba(255,255,255,0.18) 0 2px, transparent 3px 38px),
+    radial-gradient(circle at 70% 60%, rgba(255,255,255,0.14) 0 2px, transparent 3px 46px),
+    radial-gradient(circle at 40% 80%, rgba(255,255,255,0.12) 0 2px, transparent 3px 52px);
+  animation: rippleMove 8s linear infinite;
+  mix-blend-mode: overlay;
+}
+@keyframes rippleMove{
+  0%   { transform: translate3d(0,0,0) scale(1); }
+  50%  { transform: translate3d(-2.5%,1.5%,0) scale(1.02); }
+  100% { transform: translate3d(0,0,0) scale(1); }
+}
 
-    .overlay{
-      position: fixed;
-      inset: 0;
-      background:
-        radial-gradient(1200px 700px at 50% 55%, rgba(105,105,189,0.18), transparent 55%),
-        radial-gradient(900px 500px at 50% 35%, rgba(255,255,255,0.06), transparent 60%),
-        radial-gradient(circle at top, rgba(255,105,180,0.18), rgba(0,0,0,0.25));
-      z-index: 1;
-      pointer-events:none;
-    }
+/* Soft dark vignette for readability */
+.vignette{
+  position:fixed;
+  inset:0;
+  z-index:-2;
+  pointer-events:none;
+  background: radial-gradient(circle at 50% 40%, rgba(0,0,0,0.12), rgba(0,0,0,0.55));
+}
 
-    .celebration{
-      position: fixed;
-      inset: 0;
-      z-index: 55;
-      pointer-events:none;
-      overflow:hidden;
+/* ===== LEAVES CANVAS ===== */
+#leaves{
+  position:fixed;
+  inset:0;
+  z-index:-1;
+  pointer-events:none;
+}
 
-      /* ✅ hard clip to avoid edge pixel artifacts */
-      clip-path: inset(0);
-      contain: paint;
-    }
+/* ===== CONTENT ===== */
+.wrap{
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding: 22px;
+}
 
-    .wrap{
-      position: relative;
-      z-index: 2;
-      min-height: 100svh;
-      padding: 16px 12px 24px;
-      display:flex;
-      justify-content:center;
-      align-items:flex-start;
-    }
+.card{
+  height: 800px;
+  width: min(var(--card-max), 100%);
+  background: var(--glass);
+  border: 1px solid var(--stroke);
+  border-radius: 12px;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 20px 40px rgba(0,0,0,0.60);
+  padding: var(--card-pad);
+}
 
-    .column{
-      width: min(1400px, 100%);
-      display:flex;
-      flex-direction:column;
-      gap: 12px;
-    }
+.header{
+  display:flex;
+  flex-wrap:wrap;
+  gap:6px;
+  align-items:center;
+  justify-content:space-between;
+  margin-bottom: 14px;
+}
 
-    .frame{
-      width: 100%;
-      padding: var(--frame-pad);
-      border-radius: 18px;
-      border: 1px solid var(--stroke);
-      background: var(--glass);
-      backdrop-filter: blur(10px);
-      box-shadow: 0 20px 70px rgba(0,0,0,0.45);
-    }
+h1{
+  margin:0;
+  font-size: clamp(22px, 2.8vw, 40px);
+  letter-spacing: 0.2px;
+}
 
-    .frame-inner{
-      width: 100%;
-      margin: 0 auto;
-      max-width: 1200px;
-    }
+.sub{
+  margin:0;
+  opacity:0.9;
+  font-size: clamp(13px, 1.2vw, 16px);
+}
 
-    /* ===== HERO (your sketch) ===== */
-    .hero{
-      display:grid;
+.controls{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+}
 
-      grid-template-columns:
-        minmax(140px, var(--lane-w))
-        minmax(260px, 1fr)
-        minmax(140px, var(--lane-w));
+button{
+  border:0;
+  border-radius:999px;
+  padding:10px 16px;
+  font-weight:800;
+  cursor:pointer;
+  background: rgba(30,96,218,0.95);
+  color:white;
+}
+button:hover{ filter:brightness(1.1); }
+button:active{ transform: translateY(1px); }
 
-      grid-template-areas:
-        "p1 header p3"
-        "p1 p2     p3";
+/* ===== 4-COLUMN PHOTO STRIP ===== */
+.grid{
+  display:grid;
+  grid-template-columns: repeat(4, 1fr); /* 4 photos in one row */
+  gap: 14px;
+}
 
-      gap: var(--stage-gap);
-      align-items: stretch;
-      margin-bottom: var(--stage-gap);
-    }
+.tile{
+  border-radius: 1px;
+  overflow:hidden;
+  background: rgba(0,0,0,0.28);
+  border:1px solid rgba(67, 82, 241, 0.18);
+  box-shadow:0 18px 40px rgba(0,0,0,0.5);
+  padding: 10px;
+  position:relative;
+  min-height: 620px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 
-    .card{
-      border-radius: 18px;
-      border: 1px solid rgba(255,255,255,0.14);
-      background: rgba(0,0,0,0.10);
-      box-shadow: 0 10px 24px rgba(0,0,0,0.25);
-      overflow:hidden;
-    }
+.tile img{
+  width: 100%;
+  height:100%;
+  object-fit: contain;
+  border-radius: 40px;
+  object-fit: contain; /* FULL IMAGE ALWAYS */
+  display:block;
+  transform: scale(1.25);
+  transition: transform 500ms ease, filter 500ms ease;
+}
 
-    .header-card{ grid-area: header; }
-    .p1{ grid-area: p1; }
-    .p2{ grid-area: p2; }
-    .p3{ grid-area: p3; }
+.tile:hover img{
+  transform: scale(1.08);
+  filter: saturate(1.08) contrast(1.04);
+}
 
-    .content{
-      text-align:center;
-      padding: 14px 14px 12px;
-      min-height: var(--hero-header-minh);
-      border-radius: 18px;
-      border: 1px solid var(--stroke);
-      background: var(--glass);
-      backdrop-filter: blur(10px);
-      box-shadow: 0 20px 60px rgba(0,0,0,0.35);
-    }
+.caption{
+  position:absolute;
+  left:10px;
+  bottom:10px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-weight:800;
+  font-size: 12px;
+  background: rgba(0,0,0,0.35);
+  border: 1px solid rgba(255,255,255,0.16);
+  backdrop-filter: blur(6px);
+}
 
-    h1{
-      margin:0 0 10px;
-      font-size: clamp(18px, 2.8vw, 30px);
-      letter-spacing: 0.2px;
-      font-family: "Noto Sans Devanagari", system-ui, sans-serif;
-    }
-
-    .controls{
-      display:flex;
-      justify-content:center;
-      gap:10px;
-      flex-wrap: wrap;
-    }
-
-    button{
-      border:0;
-      border-radius: 999px;
-      padding: 10px 14px;
-      font-weight: 800;
-      cursor:pointer;
-      background: rgba(30, 96, 218, 0.92);
-      color: #fff;
-      touch-action: manipulation;
-    }
-    button:active{ transform: translateY(1px); }
-
-    .back-btn{
-      width: 90px;
-      height:38px;
-      border: 1px solid rgba(255,255,255,0.18);
-      background: rgba(30, 96, 218, 0.92);
-    }
-
-    .photo-card{
-      height: 100%;
-      min-height: calc(var(--hero-header-minh) + var(--hero-photo-minh) + var(--stage-gap));
-      max-height: calc(var(--hero-header-minh) + var(--hero-photo-maxh) + var(--stage-gap));
-    }
-
-    .photo2-card{
-      min-height: var(--hero-photo-minh);
-      max-height: var(--hero-photo-maxh);
-    }
-
-    /* ✅ top photos fit fully (no cropping) */
-    .photo-card img,
-    .photo2-card img{
-      width:100%;
-      height:100%;
-      display:block;
-      object-fit: contain;
-      background: rgba(0,0,0,0.18);
-    }
-
-    /* ===== STAGE ===== */
-    .stage{
-      display:grid;
-      grid-template-columns:
-        minmax(140px, var(--lane-w))
-        minmax(0, 1fr)
-        minmax(140px, var(--lane-w));
-      grid-template-areas: "left frame right";
-      gap: var(--stage-gap);
-      align-items: stretch;
-    }
-
-    .lane.left  { grid-area: left; }
-    .lane.right { grid-area: right; }
-    .frame-center { grid-area: frame; }
-
-    .frame-center{
-      position: relative;
-      width: 100%;
-      border-radius: 14px;
-      overflow:hidden;
-      border: 1px solid rgba(255,255,255,0.12);
-      background: rgba(0,0,0,0.10);
-      box-shadow: 0 18px 45px rgba(0,0,0,0.28);
-    }
-
-    .frame-center > img.frame-bg{
-      width: 100%;
-      height: auto;
-      max-height: 70svh;
-      display:block;
-      object-fit: contain;
-      background: rgba(0,0,0,0.08);
-    }
-
-    .lane{
-      pointer-events:none;
-      overflow:hidden;
-      border-radius: 14px;
-      background: rgba(0,0,0,0.10);
-      border: 1px solid rgba(255,255,255,0.10);
-      backdrop-filter: blur(2px);
-      height: var(--frame-h, 420px);
-      max-height: 70svh;
-    }
-
-    .lane-track{
-      display:flex;
-      flex-direction:column;
-      gap: var(--lane-gap);
-      padding: 10px;
-      will-change: transform;
-      animation: laneScroll var(--scroll-seconds) linear infinite;
-      --loop: 600px;
-    }
-    .lane.right .lane-track{ animation-direction: reverse; }
-
-    .tile{
-      width: 100%;
-      height: var(--tile-h);
-      border-radius: var(--tile-radius);
-      overflow:hidden;
-      background: rgba(255,255,255,0.08);
-      border: 1px solid rgba(255,255,255,0.14);
-      box-shadow: 0 10px 24px rgba(0,0,0,0.35);
-    }
-    .tile img{
-      width:100%;
-      height:100%;
-      object-fit: cover;
-      display:block;
-    }
-
-    @keyframes laneScroll{
-      from { transform: translateY(0); }
-      to   { transform: translateY(calc(-1 * var(--loop))); }
-    }
-
-    /* ===== MOBILE / TABLET ===== */
-    @media (max-width: 900px){
-      :root{
-        --lane-w: clamp(120px, 22vw, 180px);
-        --hero-header-minh: 78px;
-        --hero-photo-minh: 180px;
-        --hero-photo-maxh: 30vh;
-        --tile-h: 110px;
-        --scroll-seconds: 18s;
-      }
-
-      .controls button{
-        padding: 9px 12px;
-        font-weight: 800;
-      }
-    }
-
-    /* ✅ VERY SMALL PHONES */
-    @media (max-width: 520px){
-      :root{
-        --lane-w: 150px;
-        --hero-photo-minh: 190px;
-        --hero-photo-maxh: 34vh;
-      }
-
-      .hero{
-        grid-template-columns: 1fr 1fr;
-        grid-template-areas:
-          "header header"
-          "p1     p3"
-          "p2     p2";
-      }
-
-      .photo-card{
-        min-height: 220px;
-        max-height: 40vh;
-      }
-
-      .content{
-        padding: 12px 12px 10px;
-      }
-
-      h1{ font-size: 20px; }
-
-      .stage{
-        grid-template-columns: 1fr 1fr;
-        grid-template-areas:
-          "frame frame"
-          "left  right";
-      }
-
-      .lane{
-        height: clamp(220px, 30svh, 320px);
-        max-height: none;
-      }
-
-      .frame-center > img.frame-bg{
-        max-height: 52svh;
-      }
-    }
-
-    @media (prefers-reduced-motion: reduce){
-      .lane-track{ animation: none; }
-      .celebration{ display:none; }
-    }
-  </style>
+/* Responsive: 2x2 on small screens */
+@media (max-width: 900px){
+  .tile{min-height: 420px;}
+  .grid{ grid-template-columns: repeat(2, 1fr); }
+}
+</style>
 </head>
 
 <body>
-  <div class="overlay"></div>
-  <div id="celebration" class="celebration"></div>
+  <!-- Background -->
+  <div class="bg" aria-hidden="true">
+    <img src="./assets/backgrounds/sea.jpg" alt="">
+    <img src="./assets/backgrounds/forest.jpg" alt="">
+    <img src="./assets/backgrounds/waterfall.jpg" alt="">
+    <img src="./assets/backgrounds/sky.jpg" alt="">
+  </div>
+  <div class="stars" aria-hidden="true"></div>
+  <div class="ripples" aria-hidden="true"></div>
+  <div class="vignette" aria-hidden="true"></div>
 
-  <audio id="music" src="assets/music/folk_songs_1.mp3" loop></audio>
+  <!-- Falling leaves -->
+  <canvas id="leaves"></canvas>
 
+  <!-- Content -->
   <div class="wrap">
-    <div class="column">
-      <div class="frame">
-        <div class="frame-inner">
+    <div class="card">
+      <div class="header">
+        <div>
+          <h1>🌿को हौ तिमी ?</h1>
+          <p class="sub">को हौ त तिमी? तिमीलाई म कसरी परिभाषित गर्छु त?</p>
+        </div>
 
-          <div class="hero" aria-label="Top layout">
-            <div class="card photo-card p1"><img id="strip1" alt="top photo 1"></div>
+        <div class="controls">
+          <button type="button" onclick="history.back()">← Back</button>
+        </div>
+      </div>
 
-            <div class="header-card">
-              <div class="content">
-                <h1>Happy Valentine’s Day! 💘</h1>
-                <div class="controls">
-                  <button onclick="history.back()" class="back-btn">← Back</button>
-                  <button id="playBtn">Play Music ▶</button>
-                  <button id="pauseBtn">Pause ⏸</button>
-                  <button type="button" id="nextBtn" class="next-btn">Next</button>
-                </div>
-              </div>
-            </div>
-
-            <div class="card photo2-card p2"><img id="strip2" alt="top photo 2"></div>
-            <div class="card photo-card p3"><img id="strip3" alt="top photo 3"></div>
-          </div>
-
-          <div class="stage">
-            <div class="lane left" aria-hidden="true">
-              <div class="lane-track" id="leftTrack"></div>
-            </div>
-
-            <div class="frame-center">
-              <img id="frameImg" class="frame-bg" src="assets/Valentine's Day Frame.png" alt="Valentine frame">
-            </div>
-
-            <div class="lane right" aria-hidden="true">
-              <div class="lane-track" id="rightTrack"></div>
-            </div>
-          </div>
-
+      <!-- 4 photos at the same time (one row, 4 columns) -->
+      <div class="grid">
+        <div class="tile">
+          <img src="./assets/1.png" alt="Screenshot 1">
+          <div class="caption">1</div>
+        </div>
+        <div class="tile">
+          <img src="./assets/2.png" alt="Screenshot 2">
+          <div class="caption">2</div>
+        </div>
+        <div class="tile">
+          <img src="./assets/3.png" alt="Screenshot 3">
+          <div class="caption">3</div>
+        </div>
+        <div class="tile">
+          <img src="./assets/4.png" alt="Screenshot 4">
+          <div class="caption">4</div>
         </div>
       </div>
     </div>
   </div>
 
-  <script>
-    /* NAVIGATION */
-    document.getElementById("nextBtn").addEventListener("click", () => {
-      window.location.href = "./timi.html";
-    });
+<script>
+/* ===== Falling Leaves (Canvas) ===== */
+const canvas = document.getElementById("leaves");
+const ctx = canvas.getContext("2d", { alpha:true });
 
-    /* MUSIC */
-    const music = document.getElementById("music");
-    const playBtn = document.getElementById("playBtn");
-    const pauseBtn = document.getElementById("pauseBtn");
+function resize(){
+  canvas.width = window.innerWidth * devicePixelRatio;
+  canvas.height = window.innerHeight * devicePixelRatio;
+  canvas.style.width = window.innerWidth + "px";
+  canvas.style.height = window.innerHeight + "px";
+  ctx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0);
+}
+window.addEventListener("resize", resize);
+resize();
 
-    playBtn.addEventListener("click", async () => { try { await music.play(); } catch {} });
-    pauseBtn.addEventListener("click", () => music.pause());
+function rand(min, max){ return Math.random() * (max - min) + min; }
 
-    window.addEventListener("load", async () => {
-      try { await music.play(); } catch (_) {}
-      startCelebration(400000);
+const leafColors = [
+  "rgba(255, 210, 120, 0.75)", // warm
+  "rgba(120, 255, 170, 0.55)", // green
+  "rgba(255, 150, 180, 0.55)", // pink-ish
+  "rgba(255, 255, 255, 0.30)"  // sparkle
+];
 
-      initTopStrip();
-      await initLanes();
-      syncLaneHeightToFrame();
-    });
+const leaves = [];
+const LEAF_COUNT = Math.round(Math.min(70, Math.max(28, window.innerWidth / 22)));
 
-    /* PHOTOS */
-    const topPhotos = [
-      "assets/small1.png",
-      "assets/moon2.jpeg",
-      "assets/small2.png",
-    ];
+function makeLeaf(){
+  const size = rand(10, 26);
+  return {
+    x: rand(-40, window.innerWidth + 40),
+    y: rand(-window.innerHeight, -20),
+    r: size,
+    vx: rand(-0.35, 0.55),
+    vy: rand(0.6, 1.6),
+    spin: rand(-0.03, 0.03),
+    a: rand(0, Math.PI * 2),
+    sway: rand(14, 45),
+    color: leafColors[Math.floor(rand(0, leafColors.length))],
+    drift: rand(0.6, 1.6),
+  };
+}
 
-    const leftPhotos = [
-      "assets/leftlane/1.jpeg",
-      "assets/leftlane/2.jpeg",
-      "assets/leftlane/3.jpeg",
-      "assets/leftlane/4.jpeg",
-      "assets/leftlane/5.jpeg",
-    ];
+for(let i=0;i<LEAF_COUNT;i++) leaves.push(makeLeaf());
 
-    const rightPhotos = [
-      "assets/coupleb2irds.jpg",
-      "assets/122just.jpg",
-      "assets/larsa.jpg",
-      "assets/lastone1.png",
-      "assets/lovebirds3.jpg",
-    ];
+function drawLeaf(l){
+  ctx.save();
+  ctx.translate(l.x, l.y);
+  ctx.rotate(l.a);
+  ctx.fillStyle = l.color;
 
-    function setImgOrLog(id, src){
-      const el = document.getElementById(id);
-      el.onload  = () => console.log(`[OK] ${id} loaded:`, src);
-      el.onerror = () => console.error(`[FAIL] ${id} missing/not reachable:`, src);
-      el.src = src;
+  // simple "leaf" shape (two arcs)
+  ctx.beginPath();
+  ctx.moveTo(0, -l.r);
+  ctx.quadraticCurveTo(l.r, -l.r * 0.2, 0, l.r);
+  ctx.quadraticCurveTo(-l.r, -l.r * 0.2, 0, -l.r);
+  ctx.closePath();
+  ctx.fill();
+
+  // mid vein
+  ctx.strokeStyle = "rgba(0,0,0,0.12)";
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(0, -l.r * 0.85);
+  ctx.lineTo(0, l.r * 0.85);
+  ctx.stroke();
+
+  ctx.restore();
+}
+
+let t = 0;
+function tick(){
+  t += 0.016;
+  ctx.clearRect(0,0,window.innerWidth, window.innerHeight);
+
+  for(const l of leaves){
+    l.y += l.vy;
+    l.x += l.vx + Math.sin(t * l.drift) * 0.15;
+    l.a += l.spin;
+
+    // gentle horizontal sway
+    l.x += Math.sin((l.y / 80) + l.a) * 0.15;
+
+    drawLeaf(l);
+
+    // recycle
+    if(l.y > window.innerHeight + 40){
+      l.y = rand(-120, -40);
+      l.x = rand(-40, window.innerWidth + 40);
     }
+  }
 
-    function initTopStrip(){
-      setImgOrLog("strip1", topPhotos[0]);
-      setImgOrLog("strip2", topPhotos[1]);
-      setImgOrLog("strip3", topPhotos[2]);
-    }
-
-    /* AUTO-SLIDING LANES */
-    function buildTrack(trackEl, photos){
-      const doubled = photos.concat(photos);
-      trackEl.innerHTML = "";
-      const imgPromises = [];
-
-      for(const src of doubled){
-        const tile = document.createElement("div");
-        tile.className = "tile";
-
-        const img = document.createElement("img");
-        img.src = src;
-        img.alt = "photo";
-        img.loading = "lazy";
-
-        imgPromises.push(new Promise((resolve) => {
-          if (img.complete) return resolve();
-          img.addEventListener("load", resolve, { once:true });
-          img.addEventListener("error", resolve, { once:true });
-        }));
-
-        tile.appendChild(img);
-        trackEl.appendChild(tile);
-      }
-
-      return Promise.all(imgPromises).then(() => {
-        requestAnimationFrame(() => {
-          const half = Math.floor(trackEl.scrollHeight / 2);
-          trackEl.style.setProperty("--loop", (half > 50 ? half : 600) + "px");
-        });
-      });
-    }
-
-    async function initLanes(){
-      const leftTrack = document.getElementById("leftTrack");
-      const rightTrack = document.getElementById("rightTrack");
-      await Promise.all([
-        buildTrack(leftTrack, leftPhotos),
-        buildTrack(rightTrack, rightPhotos),
-      ]);
-    }
-
-    /* Match lane height to center frame height (desktop + mobile) */
-    function syncLaneHeightToFrame(){
-      const img = document.getElementById("frameImg");
-      const stage = document.querySelector(".stage");
-
-      const apply = () => {
-        const h = Math.round(img.getBoundingClientRect().height);
-        if (h > 0) stage.style.setProperty("--frame-h", h + "px");
-      };
-
-      if (img.complete) apply();
-      img.addEventListener("load", apply, { once:true });
-
-      const ro = new ResizeObserver(apply);
-      ro.observe(img);
-
-      window.addEventListener("resize", apply, { passive:true });
-    }
-
-    /* Celebration */
-    const layer = document.getElementById("celebration");
-    function rand(min, max){ return Math.random() * (max - min) + min; }
-    function pick(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
-
-    const balloonColors = [
-      "linear-gradient(180deg, rgba(255,82,130,1), rgba(180,35,90,1))",
-      "linear-gradient(180deg, rgba(255,215,90,1), rgba(190,120,10,1))",
-      "linear-gradient(180deg, rgba(120,220,255,1), rgba(20,120,190,1))",
-      "linear-gradient(180deg, rgba(170,255,160,1), rgba(40,160,90,1))",
-      "linear-gradient(180deg, rgba(255,255,255,0.95), rgba(210,210,210,0.95))"
-    ];
-    const sparkColors = [
-      "rgba(255,105,180,1)",
-      "rgba(255,230,120,1)",
-      "rgba(140,235,255,1)",
-      "rgba(180,255,170,1)",
-      "rgba(255,255,255,1)"
-    ];
-
-    function spawnBalloon(){
-      const b = document.createElement("div");
-      b.className = "balloon";
-      b.style.left = rand(2, 98) + "vw";
-      b.style.background = pick(balloonColors);
-
-      const dur = rand(7.5, 12.5);
-      b.style.animationDuration = dur + "s";
-      b.style.setProperty("--drift", rand(-120, 120) + "px");
-      b.style.setProperty("--rot", rand(-18, 18) + "deg");
-
-      layer.appendChild(b);
-      setTimeout(() => b.remove(), (dur + 0.2) * 1000);
-    }
-
-    /* ✅ FIXED: keep fireworks away from edges + shorter distance */
-    function spawnFireworkBurst(){
-      const x = rand(22, 78);
-      const y = rand(10, 50);
-      const particles = Math.floor(rand(16, 26));
-
-      for(let i=0;i<particles;i++){
-        const p = document.createElement("div");
-        p.className = "spark";
-        p.style.left = x + "vw";
-        p.style.top  = y + "vh";
-        p.style.background = pick(sparkColors);
-
-        const angle = rand(0, Math.PI * 2);
-        const dist  = rand(30, 120);
-
-        p.style.setProperty("--dx", (Math.cos(angle) * dist) + "px");
-        p.style.setProperty("--dy", (Math.sin(angle) * dist) + "px");
-
-        const size = rand(5, 10);
-        p.style.width = size + "px";
-        p.style.height = size + "px";
-
-        layer.appendChild(p);
-        setTimeout(() => p.remove(), 950);
-      }
-    }
-
-    function startCelebration(ms){
-      const balloonTimer = setInterval(() => {
-        const count = Math.floor(rand(1, 4));
-        for(let i=0;i<count;i++) spawnBalloon();
-      }, 450);
-
-      const fireworkTimer = setInterval(() => {
-        spawnFireworkBurst();
-        if(Math.random() < 0.45) setTimeout(spawnFireworkBurst, rand(140, 260));
-      }, 650);
-
-      setTimeout(() => {
-        clearInterval(balloonTimer);
-        clearInterval(fireworkTimer);
-        layer.classList.add("fade-out");
-        setTimeout(() => {
-          layer.innerHTML = "";
-          layer.style.display = "none";
-        }, 950);
-      }, ms);
-    }
-  </script>
+  requestAnimationFrame(tick);
+}
+tick();
+</script>
 </body>
 </html>
