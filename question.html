@@ -46,7 +46,7 @@
       background: #000;
     }
 
-    /* Background */
+    /* Background (always consistent) */
     .page-bg{
       position: fixed;
       inset: 0;
@@ -115,6 +115,42 @@
       min-height: var(--sceneH);
       padding-top: calc(var(--ropeTopH) + 18px);
       padding-right: calc(var(--ropeSideW) + 12px);
+    }
+
+    /* ==========================================================
+       Name lock (Tika Ram + Geeta)
+       ========================================================== */
+    .name-lock{
+      position: absolute;
+      left: 22px;
+      top: 240px;
+      z-index: 9;
+      pointer-events: none;
+    }
+    .name-lock-inner{
+      padding: 18px 20px;
+      border-radius: 22px;
+      border: 1px solid rgba(255,255,255,.16);
+      background: rgba(0,0,0,.28);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 26px 70px rgba(0,0,0,.44);
+      min-width: 220px;
+    }
+    .name-lock-title{
+      font-size: 34px;
+      font-weight: 900;
+      line-height: 1.05;
+      color: rgba(255,255,255,.92);
+      text-shadow: 0 12px 30px rgba(0,0,0,.45);
+      font-family: ui-serif, Georgia, "Times New Roman", serif;
+    }
+    .name-lock-plus{
+      margin-top: 6px;
+      font-size: 28px;
+      font-weight: 900;
+      color: rgba(255,255,255,.88);
+      text-shadow: 0 12px 30px rgba(0,0,0,.45);
+      font-family: ui-serif, Georgia, "Times New Roman", serif;
     }
 
     /* ==========================================================
@@ -193,7 +229,6 @@
       opacity: .85;
     }
 
-    /* Dots and event boxes live inside scene now */
     .rope-point{
       position:absolute;
       width: 12px;
@@ -234,7 +269,7 @@
     }
 
     /* ==========================================================
-       Tree (decorative) - keep, but anchor to scene
+       Tree (decorative) - anchor to scene
        ========================================================== */
     .tree-wrap{
       position: absolute;
@@ -319,7 +354,7 @@
     }
 
     /* ==========================================================
-       Hanger line (cover whole scene so it tracks scroll)
+       Hanger line spans scene
        ========================================================== */
     .hanger{
       position:absolute;
@@ -610,55 +645,67 @@
       font-size: 12.5px;
     }
 
-    /* Music UI (fixed but responsive and non-overlapping on small screens) */
+    /* ==========================================================
+       Music UI (flexible frame card)
+       ========================================================== */
     .music-ui{
       position: fixed;
       left: 50%;
       top: 52%;
       transform: translate(-50%, -50%);
-      width: min(360px, 92vw);
-      padding: 12px 14px;
+      width: clamp(280px, 36vw, 520px);
+      padding: 14px 14px 12px;
       z-index: 50;
-      background: rgba(0,0,0,.28);
-      max-height: min(360px, 52vh);
-      overflow:auto;
+
+      border-radius: 22px;
+      border: 1px solid rgba(255,255,255,.16);
+      background: linear-gradient(135deg, rgba(0,0,0,.45), rgba(255,255,255,.06));
+      box-shadow: 0 26px 70px rgba(0,0,0,.44);
+      backdrop-filter: blur(12px);
+
+      max-height: min(420px, 56vh);
+      overflow: auto;
     }
     .music-title{
       font-weight: 900;
-      margin-bottom: 8px;
-      color: rgba(255,255,255,.92);
+      margin-bottom: 10px;
+      color: rgba(255,255,255,.94);
+      letter-spacing: .2px;
     }
     .music-list{
       display:flex;
       flex-direction:column;
-      gap: 6px;
-      margin-bottom: 10px;
+      gap: 8px;
+      margin-bottom: 12px;
     }
     .track{
-      padding: 8px 10px;
-      border-radius: 12px;
-      border: 1px solid rgba(255,255,255,.14);
+      padding: 10px 12px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,.16);
       background: rgba(255,255,255,.06);
       cursor:pointer;
-      font-weight: 800;
-      color: rgba(255,255,255,.86);
+      font-weight: 900;
+      color: rgba(255,255,255,.90);
+      transition: transform 120ms ease, filter 120ms ease;
     }
+    .track:active{ transform: scale(.99); }
     .track.active{
-      border-color: rgba(255,255,255,.30);
+      border-color: rgba(255,255,255,.32);
       background: rgba(255,255,255,.12);
     }
     .music-controls{
       display:flex;
-      gap: 8px;
+      gap: 10px;
       justify-content:center;
     }
     .mbtn{
       border: 1px solid rgba(255,255,255,.18);
-      background: rgba(0,0,0,.20);
+      background: rgba(0,0,0,.25);
       color: rgba(255,255,255,.92);
-      padding: 8px 12px;
+      padding: 10px 14px;
       border-radius: 999px;
       cursor:pointer;
+      font-weight: 900;
     }
 
     /* ==========================================================
@@ -675,12 +722,25 @@
       .rope-side-card{ display:none; }
       .tree-wrap{ display:none; }
 
-      /* move music lower so it doesn't sit over the proposal */
       .music-ui{
+        left: 50%;
         top: auto;
-        bottom: 84px;
+        bottom: 86px;
         transform: translateX(-50%);
+        width: min(94vw, 520px);
+        max-height: 42vh;
       }
+
+      .name-lock{
+        left: 12px;
+        top: 260px;
+      }
+      .name-lock-inner{
+        padding: 14px 14px;
+        min-width: 180px;
+      }
+      .name-lock-title{ font-size: 28px; }
+      .name-lock-plus{ font-size: 22px; }
     }
 
     @media (prefers-reduced-motion: reduce){
@@ -718,6 +778,14 @@
 
   <main class="wrap">
     <div id="scene">
+      <!-- ✅ Added title text -->
+      <div class="name-lock" aria-label="Name lock">
+        <div class="name-lock-inner">
+          <div class="name-lock-title">Tika Ram</div>
+          <div class="name-lock-plus">+ Geeta</div>
+        </div>
+      </div>
+
       <section class="card rope-top-card" aria-label="Rope top card">
         <div class="timeline-head">
           <h3>Our moments</h3>
@@ -735,7 +803,6 @@
 
       <!-- Rope / Road -->
       <div class="rope-overlay-wrap" aria-hidden="true">
-        <!-- taller viewBox so the lower path stays visible when scene grows -->
         <svg id="ropeOverlay" class="rope-overlay" viewBox="0 0 1000 1200" preserveAspectRatio="none">
           <path id="ropePathEdge" class="road-edge"
             d="M -80 140 C 140 40, 320 240, 520 140 S 820 40, 1080 140
@@ -960,7 +1027,7 @@
     }, { once: true });
 
     /* ==========================================================
-       Timeline events (NOW placed inside #scene, not fixed)
+       Timeline events (placed inside #scene)
        ========================================================== */
     const eventsData = [
       { d: "2019 Sep 12", t: "First Twitter message connection" },
@@ -1118,7 +1185,7 @@
       requestAnimationFrame(tick);
     }
 
-    /* Car animation (inside scene) */
+    /* Car animation (start from edge, always visible) */
     let carAnimId = null;
 
     function unwrapAngle(next, prev){
@@ -1158,8 +1225,9 @@
         const t = Math.min(1, (now - startTime) / duration);
         const ease = t < 0.5 ? (2*t*t) : (1 - Math.pow(-2*t + 2, 2)/2);
 
+        const startPct = 0.0;   // ✅ start at very beginning (screen edge)
         const endPct = 0.92;
-        const len = totalLen * (0.02 + (endPct - 0.02) * ease);
+        const len = totalLen * (startPct + (endPct - startPct) * ease);
 
         const p = lanePath.getPointAtLength(len);
         const p2 = lanePath.getPointAtLength(Math.min(totalLen, len + 3));
@@ -1178,8 +1246,12 @@
         const w = car.getBoundingClientRect().width || 90;
         const h = car.getBoundingClientRect().height || 54;
 
-        car.style.left = (pos.x - w/2) + "px";
-        car.style.top  = (pos.y - h/2) + "px";
+        // ✅ force visible on all screens
+        const x = clamp(pos.x, w/2, sceneRect.width - w/2);
+        const y = clamp(pos.y, h/2, sceneRect.height - h/2);
+
+        car.style.left = (x - w/2) + "px";
+        car.style.top  = (y - h/2) + "px";
         car.style.transform = `rotate(${angle}deg)`;
 
         if (t < 1) carAnimId = requestAnimationFrame(step);
