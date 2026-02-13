@@ -252,6 +252,7 @@
       overflow:hidden;
       border-radius: 14px;
       background: rgba(0,0,0,0.10);
+      border: 1px solid rgba(0,0,0,0.10);
       border: 1px solid rgba(255,255,255,0.10);
       backdrop-filter: blur(2px);
       height: var(--frame-h, 420px);
@@ -414,6 +415,9 @@
                   <button id="playBtn">Play Music ▶</button>
                   <button id="pauseBtn">Pause ⏸</button>
                   <button type="button" id="nextBtn" class="next-btn">Next</button>
+
+                  <!-- ✅ NEW: Stop balloons + fireworks -->
+                  <button type="button" id="stopCelebrationBtn" class="next-btn">Stop Balloons ✋</button>
                 </div>
               </div>
             </div>
@@ -456,6 +460,7 @@
     pauseBtn.addEventListener("click", () => music.pause());
 
     window.addEventListener("load", async () => {
+      // ✅ Try autoplay on load (browser rules may block if no user gesture)
       try { await music.play(); } catch (_) {}
 
       // ✅ balloons + fireworks ON
@@ -637,27 +642,62 @@
       }
     }
 
-    function startCelebration(ms){
-      const balloonTimer = setInterval(() => {
-        const count = Math.floor(rand(1, 4));
-        for(let i=0;i<count;i++) spawnBalloon();
-      }, 450);
+    // ✅ Celebration controller (so we can stop it from a button)
+    let balloonTimer = null;
+    let fireworkTimer = null;
+    let celebrationStopTimeout = null;
 
-      const fireworkTimer = setInterval(() => {
-        spawnFireworkBurst();
-        if(Math.random() < 0.45) setTimeout(spawnFireworkBurst, rand(140, 260));
-      }, 650);
+    function stopCelebration({ fade = false } = {}){
+      if (balloonTimer) { clearInterval(balloonTimer); balloonTimer = null; }
+      if (fireworkTimer) { clearInterval(fireworkTimer); fireworkTimer = null; }
+      if (celebrationStopTimeout) { clearTimeout(celebrationStopTimeout); celebrationStopTimeout = null; }
 
-      setTimeout(() => {
-        clearInterval(balloonTimer);
-        clearInterval(fireworkTimer);
+      if (!layer) return;
+
+      // Stop current balloons/sparks immediately
+      if (fade){
         layer.classList.add("fade-out");
         setTimeout(() => {
           layer.innerHTML = "";
           layer.style.display = "none";
         }, 950);
+      } else {
+        layer.classList.remove("fade-out");
+        layer.innerHTML = "";
+        layer.style.display = "none";
+      }
+    }
+
+    function startCelebration(ms){
+      // Restart clean
+      if (!layer) return;
+      layer.style.display = "block";
+      layer.classList.remove("fade-out");
+      layer.innerHTML = "";
+
+      balloonTimer = setInterval(() => {
+        const count = Math.floor(rand(1, 4));
+        for(let i=0;i<count;i++) spawnBalloon();
+      }, 450);
+
+      fireworkTimer = setInterval(() => {
+        spawnFireworkBurst();
+        if(Math.random() < 0.45) setTimeout(spawnFireworkBurst, rand(140, 260));
+      }, 650);
+
+      // Auto-stop after ms (your previous behavior)
+      celebrationStopTimeout = setTimeout(() => {
+        stopCelebration({ fade: true });
       }, ms);
     }
+
+    // ✅ NEW: Stop button wiring
+    const stopCelebrationBtn = document.getElementById("stopCelebrationBtn");
+    stopCelebrationBtn.addEventListener("click", () => {
+      stopCelebration({ fade: false });       // instant stop
+      stopCelebrationBtn.disabled = true;     // optional
+      stopCelebrationBtn.textContent = "Stopped ✅"; // optional
+    });
   </script>
 </body>
 </html>
